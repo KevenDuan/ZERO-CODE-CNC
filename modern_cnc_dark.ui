@@ -1339,84 +1339,173 @@ QPushButton:pressed {
       </widget>
 
       <widget class="QWidget" name="page_CNC">
-       <layout class="QVBoxLayout" name="vLayout_CNC_Root">
-        <property name="spacing"><number>12</number></property>
-        <property name="leftMargin"><number>10</number></property>
-        <property name="topMargin"><number>10</number></property>
-        <property name="rightMargin"><number>10</number></property>
-        <property name="bottomMargin"><number>10</number></property>
+        <layout class="QVBoxLayout" name="vLayout_CNC_Root">
+          <property name="spacing"><number>8</number></property>
+          <property name="leftMargin"><number>10</number></property>
+          <property name="topMargin"><number>10</number></property>
+          <property name="rightMargin"><number>10</number></property>
+          <property name="bottomMargin"><number>10</number></property>
 
-        <item>
-         <widget class="QGroupBox" name="groupBox_CNC_Workpiece">
-          <property name="title"><string>工件属性 (Workpiece)</string></property>
-          <layout class="QVBoxLayout" name="vLayout_CNC_Props">
-           <item><widget class="QLabel" name="lbl_CNC_FileName_Title"><property name="text"><string>解析文件名:</string></property></widget></item>
-           <item><widget class="QLineEdit" name="edit_CNC_FileName"><property name="readOnly"><bool>true</bool></property><property name="text"><string>未加载文件...</string></property></widget></item>
-           <item>
-            <layout class="QHBoxLayout">
-             <item>
-              <layout class="QVBoxLayout">
-               <item><widget class="QLabel"><property name="text"><string>零件长度 (L):</string></property></widget></item>
-               <item><widget class="QLineEdit" name="edit_CNC_PartLength"><property name="readOnly"><bool>true</bool></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget></item>
+          <item>
+            <widget class="QGroupBox" name="groupBox_CNC_Workpiece">
+              <property name="title"><string>工件属性 (Dimensions)</string></property>
+              <layout class="QHBoxLayout" name="hLayout_Dimensions">
+                <item>
+                  <layout class="QVBoxLayout">
+                    <item><widget class="QLabel"><property name="text"><string>零件长度 (L):</string></property></widget></item>
+                    <item><widget class="QLineEdit" name="edit_CNC_PartLength"><property name="readOnly"><bool>true</bool></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget></item>
+                  </layout>
+                </item>
+                <item>
+                  <layout class="QVBoxLayout">
+                    <item><widget class="QLabel"><property name="text"><string>零件宽度 (W):</string></property></widget></item>
+                    <item><widget class="QLineEdit" name="edit_CNC_PartWidth"><property name="readOnly"><bool>true</bool></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget></item>
+                  </layout>
+                </item>
               </layout>
-             </item>
-             <item>
-              <layout class="QVBoxLayout">
-               <item><widget class="QLabel"><property name="text"><string>零件宽度 (W):</string></property></widget></item>
-               <item><widget class="QLineEdit" name="edit_CNC_PartWidth"><property name="readOnly"><bool>true</bool></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget></item>
-              </layout>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </widget>
-        </item>
-
-        <item>
-         <widget class="QGroupBox" name="groupBox_CNC_Strategy">
-          <property name="title"><string>加工模式 (Mode)</string></property>
-          <layout class="QHBoxLayout">
-           <item><widget class="QLabel"><property name="text"><string>策略选择:</string></property></widget></item>
-           <item>
-            <widget class="QComboBox" name="combo_CNC_WorkMode">
-             <item><property name="text"><string>自动钻孔模式</string></property></item>
-             <item><property name="text"><string>轮廓洗切模式</string></property></item>
-             <item><property name="text"><string>其他模式</string></property></item>
             </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
+          </item>
 
-        <item>
-         <widget class="QLabel" name="lbl_CNC_Features"><property name="text"><string>● 图纸几何特征识别 (Features)</string></property><property name="styleSheet"><string>color: #548AF7; font-weight: bold;</string></property></widget>
-        </item>
-        <item>
-         <widget class="QTableView" name="table_CNC_Features">
-          <property name="minimumSize"><size><width>0</width><height>160</height></size></property>
-          <property name="alternatingRowColors"><bool>true</bool></property>
-         </widget>
-        </item>
+          <item>
+            <widget class="QGroupBox" name="groupBox_CNC_Strategy">
+              <property name="title"><string>策略与刀具 (Strategy &amp; Tool)</string></property>
+              <layout class="QHBoxLayout" name="hLayout_StrategyLine">
+                <item><widget class="QLabel"><property name="text"><string>模式:</string></property></widget></item>
+                <item>
+                  <widget class="QComboBox" name="combo_CNC_WorkMode">
+                    <item><property name="text"><string>自动钻孔</string></property></item>
+                    <item><property name="text"><string>轮廓洗切</string></property></item>
+                  </widget>
+                </item>
+                <item><widget class="QLabel"><property name="text"><string>刀具:</string></property></widget></item>
+                <item>
+                  <widget class="QComboBox" name="combo_CNC_ToolSelect">
+                    <item><property name="text"><string>T01 (Φ6)</string></property></item>
+                    <item><property name="text"><string>T02 (Φ8)</string></property></item>
+                  </widget>
+                </item>
+                <item><widget class="QCheckBox" name="check_CNC_FinishMilling"><property name="text"><string>精铣</string></property></widget></item>
+              </layout>
+            </widget>
+          </item>
 
-        <item>
-         <widget class="QLabel" name="lbl_CNC_Sequence"><property name="text"><string>● 加工工艺清单 (Sequence)</string></property><property name="styleSheet"><string>color: #6AAB73; font-weight: bold;</string></property></widget>
-        </item>
-        <item>
-         <widget class="QTableView" name="table_CNC_Sequence">
-          <property name="minimumSize"><size><width>0</width><height>160</height></size></property>
-         </widget>
-        </item>
+          <item>
+            <widget class="QGroupBox" name="groupBox_CNC_Params">
+              <property name="title"><string>工艺参数 (Parameters)</string></property>
+              <layout class="QGridLayout" name="grid_Params">
+                <item row="0" column="0"><widget class="QLabel"><property name="text"><string>工件厚度:</string></property></widget></item>
+                <item row="0" column="1"><widget class="QLineEdit" name="edit_CNC_Thickness"/></item>
+                <item row="0" column="2"><widget class="QLabel"><property name="text"><string>加工深度:</string></property></widget></item>
+                <item row="0" column="3"><widget class="QLineEdit" name="edit_CNC_Depth"/></item>
+                <item row="0" column="4"><widget class="QLabel"><property name="text"><string>主轴转速:</string></property></widget></item>
+                <item row="0" column="5"><widget class="QLineEdit" name="edit_CNC_Speed"/></item>
+                <item row="1" column="0"><widget class="QLabel"><property name="text"><string>每层深度:</string></property></widget></item>
+                <item row="1" column="1"><widget class="QLineEdit" name="edit_CNC_LayerDepth"/></item>
+                <item row="1" column="2"><widget class="QLabel"><property name="text"><string>加工进给:</string></property></widget></item>
+                <item row="1" column="3"><widget class="QLineEdit" name="edit_CNC_Feed"/></item>
+                <item row="1" column="4"><widget class="QLabel"><property name="text"><string>加工步距:</string></property></widget></item>
+                <item row="1" column="5"><widget class="QLineEdit" name="edit_CNC_Step"/></item>
+              </layout>
+            </widget>
+          </item>
 
-        <item>
-         <layout class="QHBoxLayout">
-          <item><widget class="QPushButton" name="btn_CNC_AddStep"><property name="text"><string>+ 添加工艺</string></property><property name="styleSheet"><string>background-color: #388E3C;</string></property></widget></item>
-          <item><widget class="QPushButton" name="btn_CNC_RemoveStep"><property name="text"><string>- 删除选中</string></property><property name="styleSheet"><string>background-color: #C62828;</string></property></widget></item>
-          <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
-         </layout>
-        </item>
+          <item>
+            <layout class="QHBoxLayout" name="hLayout_FeatureControl">
+              <property name="spacing"><number>15</number></property> <item><spacer name="spacer_feat_left"><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+              <item><widget class="QCheckBox" name="check_CNC_Group"><property name="text"><string>圆孔分组</string></property></widget></item>
+              <item><widget class="QCheckBox" name="check_CNC_Comp"><property name="text"><string>深度补偿</string></property></widget></item>
+              <item><widget class="QCheckBox" name="check_CNC_Rapid"><property name="text"><string>快速打孔</string></property></widget></item>
+              <item><widget class="QPushButton" name="btn_CNC_FeatureSelectAll"><property name="text"><string>全选/不选</string></property></widget></item>
+              <item><spacer name="spacer_feat_right"><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+            </layout>
+          </item>
+          <item>
+            <widget class="QTableView" name="table_CNC_Features">
+              <property name="minimumSize"><size><width>0</width><height>120</height></size></property>
+            </widget>
+          </item>
 
-        <item><spacer><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
-       </layout>
+          <item>
+            <layout class="QHBoxLayout" name="hLayout_SeqControl">
+              <item><widget class="QPushButton" name="btn_CNC_SeqSelectAll"><property name="text"><string>全选/不选</string></property></widget></item>
+              <item><widget class="QPushButton" name="btn_CNC_SeqDelete"><property name="text"><string>删除</string></property></widget></item>
+              <item><widget class="QPushButton" name="btn_CNC_SeqClear"><property name="text"><string>清空</string></property></widget></item>
+              <item><widget class="QPushButton" name="btn_CNC_SeqAdd"><property name="text"><string>+ 添加工艺</string></property><property name="styleSheet"><string>background-color: #388E3C;</string></property></widget></item>
+            </layout>
+          </item>
+          <item>
+            <widget class="QTableView" name="table_CNC_Sequence">
+              <property name="minimumSize"><size><width>0</width><height>120</height></size></property>
+            </widget>
+          </item>
+
+          <item>
+            <layout class="QHBoxLayout" name="hLayout_BottomOps">
+              <property name="spacing"><number>10</number></property>
+              <item><spacer name="spacer_bottom_left"><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+              
+              <item>
+                <widget class="QPushButton" name="btn_CNC_Generate">
+                  <property name="minimumSize">
+                    <size>
+                      <width>100</width>
+                      <height>32</height>
+                    </size>
+                  </property>
+                  <property name="text"><string>生成程序</string></property>
+                  <property name="styleSheet"><string notr="true">background-color: #548AF7; font-weight: bold;</string></property>
+                </widget>
+              </item>
+
+              <item>
+                <widget class="QPushButton" name="btn_CNC_ToTop">
+                  <property name="minimumSize">
+                    <size>
+                      <width>60</width>
+                      <height>32</height>
+                    </size>
+                  </property>
+                  <property name="text"><string>置顶</string></property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QPushButton" name="btn_CNC_MoveUp">
+                  <property name="minimumSize">
+                    <size>
+                      <width>60</width>
+                      <height>32</height>
+                    </size>
+                  </property>
+                  <property name="text"><string>上移</string></property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QPushButton" name="btn_CNC_MoveDown">
+                  <property name="minimumSize">
+                    <size>
+                      <width>60</width>
+                      <height>32</height>
+                    </size>
+                  </property>
+                  <property name="text"><string>下移</string></property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QPushButton" name="btn_CNC_ToBottom">
+                  <property name="minimumSize">
+                    <size>
+                      <width>60</width>
+                      <height>32</height>
+                    </size>
+                  </property>
+                  <property name="text"><string>置底</string></property>
+                </widget>
+              </item>
+
+              <item><spacer name="spacer_bottom_right"><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+            </layout>
+          </item>
+        </layout>
       </widget>
 
      </widget>
