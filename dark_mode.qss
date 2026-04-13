@@ -1,0 +1,211 @@
+/* ==============================================
+   康睿智能 CNC - 高级深空灰主题 (Premium Gray) 完整版
+   ============================================== */
+
+/* 全局基调：柔和的碳灰背景与舒适的灰白文字 */
+QWidget {
+    background-color: #2B2D30; 
+    color: #DFE1E5; 
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+    font-size: 13px;
+}
+
+/* =========================================
+   左侧主导航侧边栏 (更深的灰，制造下沉感)
+   ========================================= */
+QWidget#widget_Sidebar {
+    background-color: #1E1F22; 
+    border-right: 1px solid #393B40;
+}
+
+QLabel#lbl_Logo {
+    color: #548AF7; /* 科技蓝 */
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* 侧边栏按钮基础样式 */
+QWidget#widget_Sidebar QPushButton {
+    background-color: transparent;
+    border: none;
+    border-left: 4px solid transparent; 
+    border-radius: 0px; 
+    text-align: center; /* 强制文字居中 */
+    padding: 18px 10px; /* 去除左侧多余边距，完美居中 */
+    font-size: 16px;
+    color: #A9B0B7; /* 默认未选中时为暗灰 */
+}
+
+/* 侧边栏按钮：鼠标悬停 */
+QWidget#widget_Sidebar QPushButton:hover {
+    background-color: #2B2D30;
+    color: #FFFFFF;
+}
+
+/* 侧边栏按钮：被选中状态 (高级蓝激活) */
+QWidget#widget_Sidebar QPushButton:checked {
+    background-color: #2B2D30; /* 选中后背景和主工作区融为一体 */
+    color: #548AF7; 
+    border-left: 4px solid #548AF7; 
+}
+
+/* =========================================
+   加工页面：子级导航 (横向药丸按钮)
+   ========================================= */
+QWidget#widget_SubNav QPushButton {
+    background-color: #393B40;
+    border: 1px solid #43454A;
+    border-radius: 15px; 
+    padding: 6px 18px;
+    color: #DFE1E5;
+}
+QWidget#widget_SubNav QPushButton:hover {
+    background-color: #4A4D53;
+}
+QWidget#widget_SubNav QPushButton:pressed {
+    background-color: #548AF7;
+    color: white;
+    border-color: #548AF7;
+}
+
+/* =========================================
+   右侧控制面板与容器
+   ========================================= */
+QGroupBox {
+    border: 1px solid #43454A;
+    border-radius: 6px;
+    margin-top: 15px;
+    background-color: #323437; /* 模块背景比主背景稍微浅一点点，增加浮雕感 */
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 5px;
+    left: 10px;
+    color: #A9B0B7;
+    font-weight: bold;
+}
+
+/* CAD 核心显示区域 - 极暗灰，让图纸线条更清晰 */
+QWidget#widget_CAD_Viewer {
+    background-color: #1E1F22;
+    border: 1px solid #43454A;
+    border-radius: 6px;
+}
+QLabel#lbl_CAD_Image {
+    color: #5C616C;
+    font-size: 20px;
+}
+
+/* 底部 DRO 坐标显示区 */
+QGroupBox#groupBox_DRO {
+    background-color: #1E2328; 
+    border: 1px solid #2B333D;
+    border-radius: 6px;      /* 和右边的日志框保持一致的圆角 */
+    margin-top: 0px;         /* 【核心修复】：取消全局的 15px 顶部下压 */
+    padding-top: 5px;        /* 稍微给内部留一点呼吸空间 */
+}
+QLabel#lbl_X_Val, QLabel#lbl_Y_Val, QLabel#lbl_Z_Val,
+QLabel#lbl_WX_Val, QLabel#lbl_WY_Val, QLabel#lbl_WZ_Val {
+    font-family: "Consolas", monospace;
+    font-size: 26px;
+    font-weight: bold;
+    color: #6AAB73; 
+    qproperty-alignment: AlignCenter; 
+}
+QLabel#lbl_X_Title, QLabel#lbl_Y_Title, QLabel#lbl_Z_Title,
+QLabel#lbl_WX_Title, QLabel#lbl_WY_Title, QLabel#lbl_WZ_Title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #548AF7;
+    qproperty-alignment: AlignCenter; 
+}
+
+/* 日志框 */
+QTextBrowser {
+    background-color: #1E1F22;
+    border: 1px solid #43454A;
+    color: #A9B0B7;
+    font-family: "Consolas", monospace;
+    border-radius: 6px;
+}
+
+/* =========================================
+   通用按钮 (立体高级质感)
+   ========================================= */
+QPushButton {
+    background-color: #43454A;
+    border: 1px solid #53565C;
+    border-radius: 4px;
+    padding: 8px 12px;
+    color: #DFE1E5;
+}
+QPushButton:hover {
+    background-color: #4E5157;
+    border-color: #5E6268;
+}
+QPushButton:pressed {
+    background-color: #393B40;
+}
+
+/* 机床控制 - 启动按钮 (降低饱和度的绿) */
+QPushButton#btn_Machine_Start {
+    background-color: #388E3C; 
+    border: 1px solid #2E7D32;
+    color: #FFFFFF;
+    font-weight: bold;
+}
+QPushButton#btn_Machine_Start:hover {
+    background-color: #4CAF50;
+}
+
+/* 机床控制 - 急停按钮 (克制的砖红色) */
+QPushButton#btn_Machine_EStop {
+    background-color: #C62828; 
+    border: 1px solid #B71C1C;
+    color: #FFFFFF;
+    font-weight: bold;
+    font-size: 16px;
+}
+QPushButton#btn_Machine_EStop:hover {
+    background-color: #E53935;
+}
+
+/* =========================================
+   输入框与滑动条
+   ========================================= */
+QLineEdit {
+    background-color: #1E1F22;
+    border: 1px solid #43454A;
+    border-radius: 4px;
+    padding: 4px 8px;
+    color: #DFE1E5;
+    font-weight: bold;
+    selection-background-color: #548AF7;
+}
+QLineEdit:focus {
+    border: 1px solid #548AF7;
+}
+
+/* 滑动条精调 */
+QSlider::groove:horizontal {
+    border: 1px solid #43454A;
+    height: 6px;
+    background: #1E1F22;
+    border-radius: 3px;
+}
+QSlider::sub-page:horizontal {
+    background: #548AF7; /* 划过的区域用蓝色 */
+    border-radius: 3px;
+}
+QSlider::handle:horizontal {
+    background: #DFE1E5;
+    border: 1px solid #43454A;
+    width: 14px;
+    margin-top: -5px;
+    margin-bottom: -5px;
+    border-radius: 7px;
+}
+QSlider::handle:horizontal:hover {
+    background: #FFFFFF;
+}

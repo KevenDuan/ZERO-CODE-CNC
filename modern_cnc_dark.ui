@@ -1,0 +1,1186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1440</width>
+    <height>900</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>康瑞智能化科技有限公司</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">
+/* ==============================================
+   康睿智能 CNC - 高级深空灰主题 (硬核连体模块版)
+   ============================================== */
+
+QWidget {
+    background-color: #2B2D30; 
+    color: #DFE1E5; 
+    font-family: &quot;Microsoft YaHei&quot;, &quot;Segoe UI&quot;, sans-serif;
+    font-size: 13px;
+}
+
+/* =========================================
+   全局结构分割线 
+   ========================================= */
+QWidget#widget_Sidebar {
+    background-color: #1E1F22; 
+    border-right: 2px solid #181A1C; 
+}
+QWidget#widget_SubNav {
+    border-bottom: 2px solid #181A1C;
+    padding-bottom: 12px;  
+}
+QScrollArea#scrollArea_RightPanel {
+    border: none;          
+    border-left: 2px solid #181A1C;
+}
+QWidget#scrollAreaWidgetContents {
+    background-color: #2B2D30; 
+}
+
+/* =========================================
+   常规控件样式
+   ========================================= */
+QLabel#lbl_Logo {
+    color: #548AF7; 
+    font-size: 20px;
+    font-weight: bold;
+}
+QWidget#widget_Sidebar QPushButton {
+    background-color: transparent;
+    border: none;
+    border-left: 4px solid transparent; 
+    border-radius: 0px; 
+    text-align: center; 
+    padding: 18px 10px; 
+    font-size: 16px;
+    color: #A9B0B7; 
+}
+QWidget#widget_Sidebar QPushButton:hover {
+    background-color: #2B2D30;
+    color: #FFFFFF;
+}
+QWidget#widget_Sidebar QPushButton:checked {
+    background-color: #2B2D30; 
+    color: #548AF7; 
+    border-left: 4px solid #548AF7; 
+}
+QWidget#widget_SubNav QPushButton {
+    background-color: #393B40;
+    border: 1px solid #43454A;
+    border-radius: 15px; 
+    padding: 6px 18px;
+    color: #DFE1E5;
+}
+QWidget#widget_SubNav QPushButton:hover {
+    background-color: #4A4D53;
+}
+QWidget#widget_SubNav QPushButton:pressed {
+    background-color: #548AF7;
+    color: white;
+    border-color: #548AF7;
+}
+
+QGroupBox {
+    border: 1px solid #43454A;
+    border-radius: 6px;
+    margin-top: 15px;
+    background-color: #323437; 
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 5px;
+    left: 10px;
+    color: #A9B0B7;
+    font-weight: bold;
+}
+
+/* =========================================
+   核心显示区：CAD 与 底部连体模块
+   ========================================= */
+
+/* CAD 恢复独立的硬核边框感 */
+QWidget#widget_CAD_Viewer {
+    background-color: #1E1F22;
+    border: 1px solid #43454A;
+    border-radius: 6px;
+}
+
+/* 全新增加的 QGraphicsView 样式：去掉丑陋的白边和滚动条 */
+QGraphicsView#graphicsView_CAD {
+    background-color: transparent;
+    border: none;
+}
+
+/* 左侧坐标框只保留左侧圆角，去掉右边框 */
+QGroupBox#groupBox_DRO {
+    background-color: #1E2328; 
+    border: 1px solid #43454A;
+    border-right: none; 
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    margin-top: 0px;
+    padding-top: 5px;
+}
+QLabel#lbl_X_Val, QLabel#lbl_Y_Val, QLabel#lbl_Z_Val,
+QLabel#lbl_WX_Val, QLabel#lbl_WY_Val, QLabel#lbl_WZ_Val {
+    font-family: &quot;Consolas&quot;, monospace;
+    font-size: 26px;
+    font-weight: bold;
+    color: #6AAB73; 
+    qproperty-alignment: AlignCenter; 
+}
+QLabel#lbl_X_Title, QLabel#lbl_Y_Title, QLabel#lbl_Z_Title,
+QLabel#lbl_WX_Title, QLabel#lbl_WY_Title, QLabel#lbl_WZ_Title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #548AF7;
+    qproperty-alignment: AlignCenter; 
+}
+
+/* 右侧日志框拥有完整边框和右侧圆角 */
+QTextBrowser#textBrowser_Log {
+    background-color: #1E1F22;
+    border: 1px solid #43454A;
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    color: #A9B0B7;
+    font-family: &quot;Consolas&quot;, monospace;
+    padding: 10px;
+}
+
+/* =========================================
+   通用按钮及机床控制按钮
+   ========================================= */
+QPushButton {
+    background-color: #43454A;
+    border: 1px solid #53565C;
+    border-radius: 4px;
+    padding: 8px 12px;
+    color: #DFE1E5;
+}
+QPushButton:hover {
+    background-color: #4E5157;
+    border-color: #5E6268;
+}
+QPushButton:pressed {
+    background-color: #393B40;
+}
+QPushButton#btn_Machine_Start {
+    background-color: #388E3C; 
+    border: 1px solid #2E7D32;
+    color: #FFFFFF;
+    font-weight: bold;
+}
+QPushButton#btn_Machine_Start:hover {
+    background-color: #4CAF50;
+}
+QPushButton#btn_Machine_EStop {
+    background-color: #C62828; 
+    border: 1px solid #B71C1C;
+    color: #FFFFFF;
+    font-weight: bold;
+    font-size: 16px;
+}
+QPushButton#btn_Machine_EStop:hover {
+    background-color: #E53935;
+}
+
+/* =========================================
+   外围辅助设备开关 (自锁灯光 Toggle 按钮)
+   ========================================= */
+QGroupBox#groupBox_Aux QPushButton {
+    background-color: #2B2D30;
+    border: 1px solid #43454A;
+    border-radius: 4px;
+    padding: 10px 4px; 
+    color: #A9B0B7;
+    font-weight: bold;
+}
+QGroupBox#groupBox_Aux QPushButton:hover {
+    background-color: #393B40;
+    border-color: #5E6268;
+}
+QGroupBox#groupBox_Aux QPushButton:checked {
+    background-color: #548AF7; 
+    border: 1px solid #3A6ACC;
+    color: #FFFFFF;
+}
+
+/* =========================================
+   输入框与滑动条
+   ========================================= */
+QLineEdit {
+    background-color: #1E1F22;
+    border: 1px solid #43454A;
+    border-radius: 4px;
+    padding: 6px 8px; 
+    color: #4FC3F7;   
+    font-family: &quot;Consolas&quot;, monospace;
+    font-weight: bold;
+    font-size: 14px;
+    selection-background-color: #548AF7;
+}
+QLineEdit:focus {
+    border: 1px solid #548AF7;
+}
+QSlider::groove:horizontal {
+    border: 1px solid #43454A;
+    height: 6px;
+    background: #1E1F22;
+    border-radius: 3px;
+}
+QSlider::sub-page:horizontal {
+    background: #548AF7; 
+    border-radius: 3px;
+}
+QSlider::handle:horizontal {
+    background: #DFE1E5;
+    border: 1px solid #43454A;
+    width: 14px;
+    margin-top: -5px;
+    margin-bottom: -5px;
+    border-radius: 7px;
+}
+QSlider::handle:horizontal:hover {
+    background: #FFFFFF;
+}
+   </string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_main">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QWidget" name="widget_Sidebar" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>140</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>140</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_sidebar">
+       <property name="spacing">
+        <number>10</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>20</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="lbl_Logo">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>80</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>KR-CNC
+LOGO</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_Nav_Process">
+         <property name="text">
+          <string>加工</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_Nav_UserParam">
+         <property name="text">
+          <string>用户参数</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_Nav_SysParam">
+         <property name="text">
+          <string>系统参数</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_Nav_CNC">
+         <property name="text">
+          <string>CNC编程</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_sidebar">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QStackedWidget" name="stackedWidget_Main">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="page_Process">
+       <layout class="QHBoxLayout" name="horizontalLayout_process">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_left">
+          <property name="spacing">
+           <number>10</number>
+          </property>
+          <property name="leftMargin">
+           <number>10</number>
+          </property>
+          <property name="topMargin">
+           <number>10</number>
+          </property>
+          <property name="rightMargin">
+           <number>10</number>
+          </property>
+          <property name="bottomMargin">
+           <number>10</number>
+          </property>
+          <item>
+           <widget class="QWidget" name="widget_SubNav" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout_subnav">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="btn_Sub_Main">
+               <property name="text">
+                <string>主控</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_Sub_Offset">
+               <property name="text">
+                <string>偏置</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_Sub_Magazine">
+               <property name="text">
+                <string>刀盘</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_Sub_Tool">
+               <property name="text">
+                <string>刀具</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_Sub_GCode">
+               <property name="text">
+                <string>G代码</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_Sub_File">
+               <property name="text">
+                <string>文件</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_sub">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="widget_CAD_Viewer" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>1</horstretch>
+              <verstretch>1</verstretch>
+             </sizepolicy>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_cad">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QGraphicsView" name="graphicsView_CAD">
+               <property name="interactive">
+                <bool>true</bool>
+               </property>
+               <property name="dragMode">
+                <enum>QGraphicsView::ScrollHandDrag</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="widget_BottomInfo" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>150</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>150</height>
+             </size>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_bottom">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QGroupBox" name="groupBox_DRO">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                 <horstretch>1</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_DRO">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="lbl_X_Title">
+                  <property name="text">
+                   <string>X</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QLabel" name="lbl_X_Val">
+                  <property name="text">
+                   <string>0.000</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="2">
+                 <widget class="QLabel" name="lbl_WX_Title">
+                  <property name="text">
+                   <string>WX</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="3">
+                 <widget class="QLabel" name="lbl_WX_Val">
+                  <property name="text">
+                   <string>0.000</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="lbl_Y_Title">
+                  <property name="text">
+                   <string>Y</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QLabel" name="lbl_Y_Val">
+                  <property name="text">
+                   <string>0.000</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="2">
+                 <widget class="QLabel" name="lbl_WY_Title">
+                  <property name="text">
+                   <string>WY</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="3">
+                 <widget class="QLabel" name="lbl_WY_Val">
+                  <property name="text">
+                   <string>0.000</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="lbl_Z_Title">
+                  <property name="text">
+                   <string>Z</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QLabel" name="lbl_Z_Val">
+                  <property name="text">
+                   <string>0.000</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="2">
+                 <widget class="QLabel" name="lbl_WZ_Title">
+                  <property name="text">
+                   <string>WZ</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="3">
+                 <widget class="QLabel" name="lbl_WZ_Val">
+                  <property name="text">
+                   <string>0.000</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QTextBrowser" name="textBrowser_Log">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                 <horstretch>1</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QScrollArea" name="scrollArea_RightPanel">
+          <property name="maximumSize">
+           <size>
+            <width>400</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <widget class="QWidget" name="scrollAreaWidgetContents">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>396</width>
+             <height>896</height>
+            </rect>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_right">
+            <property name="leftMargin">
+             <number>10</number>
+            </property>
+            <property name="topMargin">
+             <number>10</number>
+            </property>
+            <property name="rightMargin">
+             <number>10</number>
+            </property>
+            <property name="bottomMargin">
+             <number>10</number>
+            </property>
+            <item>
+             <widget class="QGroupBox" name="groupBox_Jog">
+              <property name="title">
+               <string>手动运动 (Jog)</string>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_Jog">
+               <item row="0" column="1">
+                <widget class="QPushButton" name="btn_Jog_Y_Plus">
+                 <property name="text">
+                  <string>Y+ (后)</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QPushButton" name="btn_Jog_X_Minus">
+                 <property name="text">
+                  <string>X- (左)</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QPushButton" name="btn_Jog_Stop">
+                 <property name="text">
+                  <string>停止</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="2">
+                <widget class="QPushButton" name="btn_Jog_X_Plus">
+                 <property name="text">
+                  <string>X+ (右)</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QPushButton" name="btn_Jog_Y_Minus">
+                 <property name="text">
+                  <string>Y- (前)</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="2">
+                <widget class="QPushButton" name="btn_Jog_Z_Plus">
+                 <property name="text">
+                  <string>Z+ (上)</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="2">
+                <widget class="QPushButton" name="btn_Jog_Z_Minus">
+                 <property name="text">
+                  <string>Z- (下)</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupBox_Spindle">
+              <property name="title">
+               <string>主轴与进给</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_Spindle">
+               <item>
+                <layout class="QHBoxLayout">
+                 <item>
+                  <widget class="QPushButton" name="btn_Spindle_CW">
+                   <property name="text">
+                    <string>正转</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="btn_Spindle_Stop">
+                   <property name="text">
+                    <string>停转</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="btn_Spindle_CCW">
+                   <property name="text">
+                    <string>反转</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <widget class="QLabel" name="label">
+                 <property name="text">
+                  <string>主轴倍率 (100%)</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="slider_Spindle">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label">
+                 <property name="text">
+                  <string>进给倍率 (10%)</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="slider_Feed">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupBox_Params">
+              <property name="title">
+               <string>运行参数与刀具</string>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_Params">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label">
+                 <property name="text">
+                  <string>主轴速度:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QLineEdit" name="edit_SpindleSpeed">
+                 <property name="text">
+                  <string>0</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="2">
+                <widget class="QLabel" name="label">
+                 <property name="text">
+                  <string>手动速度:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="3">
+                <widget class="QLineEdit" name="edit_ManualSpeed">
+                 <property name="text">
+                  <string>0</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label">
+                 <property name="text">
+                  <string>主轴刀号:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QLineEdit" name="edit_SpindleTool">
+                 <property name="text">
+                  <string>T00</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="2">
+                <widget class="QLabel" name="label">
+                 <property name="text">
+                  <string>目标刀号:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="3">
+                <widget class="QLineEdit" name="edit_TargetTool">
+                 <property name="text">
+                  <string>T00</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="label">
+                 <property name="text">
+                  <string>刀套号:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QLineEdit" name="edit_ToolSleeve">
+                 <property name="text">
+                  <string>1</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="2">
+                <widget class="QLabel" name="label">
+                 <property name="text">
+                  <string>偏置 X:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="3">
+                <widget class="QLineEdit" name="edit_OffsetX">
+                 <property name="text">
+                  <string>0.000</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0">
+                <widget class="QLabel" name="label">
+                 <property name="text">
+                  <string>偏置 Y:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="1">
+                <widget class="QLineEdit" name="edit_OffsetY">
+                 <property name="text">
+                  <string>0.000</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="2">
+                <widget class="QLabel" name="label">
+                 <property name="text">
+                  <string>偏置 Z:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="3">
+                <widget class="QLineEdit" name="edit_OffsetZ">
+                 <property name="text">
+                  <string>0.000</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupBox_Control">
+              <property name="title">
+               <string>机床控制</string>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_Control">
+               <item row="0" column="1">
+                <widget class="QPushButton" name="btn_Machine_Reset">
+                 <property name="text">
+                  <string>复位</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="2">
+                <widget class="QPushButton" name="btn_Machine_Pause">
+                 <property name="text">
+                  <string>暂停</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="3">
+                <widget class="QPushButton" name="btn_Machine_Home">
+                 <property name="text">
+                  <string>回零</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupBox_Aux">
+              <property name="title">
+               <string>辅助控制</string>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_Aux">
+               <item row="0" column="0">
+                <widget class="QPushButton" name="btn_Aux_Handwheel">
+                 <property name="text">
+                  <string>手轮控制</string>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QPushButton" name="btn_Aux_ManualGuide">
+                 <property name="text">
+                  <string>手动引导</string>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="2">
+                <widget class="QPushButton" name="btn_Aux_Lube">
+                 <property name="text">
+                  <string>润滑油泵</string>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QPushButton" name="btn_Aux_SpindleKnock">
+                 <property name="text">
+                  <string>主轴打刀</string>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QPushButton" name="btn_Aux_Blow">
+                 <property name="text">
+                  <string>加工吹气</string>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="2">
+                <widget class="QPushButton" name="btn_Aux_ToolBlow">
+                 <property name="text">
+                  <string>对刀吹气</string>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QPushButton" name="btn_Aux_Coolant">
+                 <property name="text">
+                  <string>切削液</string>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QPushButton" name="btn_Aux_Light">
+                 <property name="text">
+                  <string>照明灯</string>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="2">
+                <widget class="QPushButton" name="btn_Aux_CenterWater">
+                 <property name="text">
+                  <string>中心出水</string>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btn_Machine_Start">
+              <property name="text">
+               <string>启动</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_right">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_UserParam">
+       <layout class="QVBoxLayout">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>&lt;h1&gt;用户参数页面 (待开发)&lt;/h1&gt;</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_SysParam">
+       <layout class="QVBoxLayout">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>&lt;h1&gt;系统参数页面 (待开发)&lt;/h1&gt;</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_CNC">
+       <layout class="QVBoxLayout">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>&lt;h1&gt;CNC免编程页面 (待开发)&lt;/h1&gt;</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
