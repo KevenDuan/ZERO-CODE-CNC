@@ -16,7 +16,7 @@
   <property name="styleSheet">
    <string notr="true">
 /* ==============================================
-   康睿智能 CNC - 高级深空灰主题 (硬核连体模块版)
+   康瑞智能化科技有限公司 - CNC - 高级深空灰主题
    ============================================== */
 
 QWidget {
@@ -27,17 +27,30 @@ QWidget {
 }
 
 QWidget#widget_Sidebar {
-    background-color: #1E1F22; 
+    background-color: #1E1F22;
     border-right: 2px solid #181A1C;
 }
 QWidget#widget_SubNav {
     border-bottom: 2px solid #181A1C;
-    padding-bottom: 12px;  
+    padding-bottom: 12px;
 }
 QScrollArea#scrollArea_RightPanel {
     border: none;
     border-left: 2px solid #181A1C;
 }
+
+/* 新增下面这一段，把分割线固定在总翻页容器上 */
+QStackedWidget#stackedWidget_Main {
+    border-left: 2px solid #181A1C;
+}
+/* 将左侧分割线直接绑定给所有翻页实体，彻底解决消失问题 */
+QWidget#page_Process,
+QWidget#page_CNC,
+QWidget#page_UserParam,
+QWidget#page_SysParam {
+    border-left: 2px solid #181A1C;
+}
+
 QWidget#scrollAreaWidgetContents {
     background-color: #2B2D30;
 }
@@ -55,7 +68,7 @@ QWidget#widget_Sidebar QPushButton {
     text-align: center;
     padding: 18px 10px; 
     font-size: 16px;
-    color: #A9B0B7; 
+    color: #A9B0B7;
 }
 QWidget#widget_Sidebar QPushButton:hover {
     background-color: #2B2D30;
@@ -63,13 +76,13 @@ QWidget#widget_Sidebar QPushButton:hover {
 }
 QWidget#widget_Sidebar QPushButton:checked {
     background-color: #2B2D30; 
-    color: #548AF7; 
+    color: #548AF7;
     border-left: 4px solid #548AF7;
 }
 QWidget#widget_SubNav QPushButton {
     background-color: #393B40;
     border: 1px solid #43454A;
-    border-radius: 15px; 
+    border-radius: 15px;
     padding: 6px 18px;
     color: #DFE1E5;
 }
@@ -126,14 +139,14 @@ QLabel#lbl_WX_Val, QLabel#lbl_WY_Val, QLabel#lbl_WZ_Val {
     font-size: 26px;
     font-weight: bold;
     color: #6AAB73; 
-    qproperty-alignment: AlignCenter; 
+    qproperty-alignment: AlignCenter;
 }
 QLabel#lbl_X_Title, QLabel#lbl_Y_Title, QLabel#lbl_Z_Title,
 QLabel#lbl_WX_Title, QLabel#lbl_WY_Title, QLabel#lbl_WZ_Title {
     font-size: 20px;
     font-weight: bold;
     color: #548AF7;
-    qproperty-alignment: AlignCenter; 
+    qproperty-alignment: AlignCenter;
 }
 
 QTextBrowser#textBrowser_Log {
@@ -238,18 +251,32 @@ QSlider::handle:horizontal:hover {
 
 /* 悬浮小加号按钮样式 (已放大优化) */
 QPushButton#btn_Small_Import {
-    background-color: rgba(84, 138, 247, 0.15); /* 康瑞蓝半透明底色，更显眼 */
+    background-color: rgba(84, 138, 247, 0.15);
     border: 2px dashed #548AF7; /* 蓝色虚线框 */
-    border-radius: 20px; /* 60x60的一半，呈现完美圆形 */
+    border-radius: 20px;
     color: #548AF7;
     font-size: 12px;
     font-weight: bold;
-    margin: 15px; 
+    margin: 15px;
 }
 QPushButton#btn_Small_Import:hover {
     background-color: #548AF7;
     border: 2px solid #548AF7;
     color: #FFFFFF;
+}
+
+/* CNC表格全局样式补充 */
+QHeaderView::section {
+    background-color: #1E1F22;
+    color: #A9B0B7;
+    padding: 4px;
+    border: 1px solid #181A1C;
+}
+QTableView {
+    background-color: #1E1F22;
+    gridline-color: #2B2D30;
+    border: 1px solid #43454A;
+    selection-background-color: #548AF7;
 }
    </string>
   </property>
@@ -809,6 +836,7 @@ QPushButton:pressed {
         <height>16777215</height>
        </size>
       </property>
+
       <widget class="QWidget" name="page_Process">
        <layout class="QHBoxLayout" name="horizontalLayout_process">
         <property name="spacing">
@@ -1279,6 +1307,7 @@ QPushButton:pressed {
         </item>
        </layout>
       </widget>
+
       <widget class="QWidget" name="page_UserParam">
        <layout class="QVBoxLayout">
         <item>
@@ -1293,6 +1322,7 @@ QPushButton:pressed {
         </item>
        </layout>
       </widget>
+      
       <widget class="QWidget" name="page_SysParam">
        <layout class="QVBoxLayout">
         <item>
@@ -1307,20 +1337,88 @@ QPushButton:pressed {
         </item>
        </layout>
       </widget>
+
       <widget class="QWidget" name="page_CNC">
-       <layout class="QVBoxLayout">
+       <layout class="QVBoxLayout" name="vLayout_CNC_Root">
+        <property name="spacing"><number>12</number></property>
+        <property name="leftMargin"><number>10</number></property>
+        <property name="topMargin"><number>10</number></property>
+        <property name="rightMargin"><number>10</number></property>
+        <property name="bottomMargin"><number>10</number></property>
+
         <item>
-         <widget class="QLabel" name="label_cnc">
-          <property name="text">
-           <string>&lt;h1&gt;CNC免编程逻辑控制区&lt;/h1&gt;</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
+         <widget class="QGroupBox" name="groupBox_CNC_Workpiece">
+          <property name="title"><string>工件属性 (Workpiece)</string></property>
+          <layout class="QVBoxLayout" name="vLayout_CNC_Props">
+           <item><widget class="QLabel" name="lbl_CNC_FileName_Title"><property name="text"><string>解析文件名:</string></property></widget></item>
+           <item><widget class="QLineEdit" name="edit_CNC_FileName"><property name="readOnly"><bool>true</bool></property><property name="text"><string>未加载文件...</string></property></widget></item>
+           <item>
+            <layout class="QHBoxLayout">
+             <item>
+              <layout class="QVBoxLayout">
+               <item><widget class="QLabel"><property name="text"><string>零件长度 (L):</string></property></widget></item>
+               <item><widget class="QLineEdit" name="edit_CNC_PartLength"><property name="readOnly"><bool>true</bool></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget></item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout">
+               <item><widget class="QLabel"><property name="text"><string>零件宽度 (W):</string></property></widget></item>
+               <item><widget class="QLineEdit" name="edit_CNC_PartWidth"><property name="readOnly"><bool>true</bool></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget></item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+          </layout>
          </widget>
         </item>
+
+        <item>
+         <widget class="QGroupBox" name="groupBox_CNC_Strategy">
+          <property name="title"><string>加工模式 (Mode)</string></property>
+          <layout class="QHBoxLayout">
+           <item><widget class="QLabel"><property name="text"><string>策略选择:</string></property></widget></item>
+           <item>
+            <widget class="QComboBox" name="combo_CNC_WorkMode">
+             <item><property name="text"><string>自动钻孔模式</string></property></item>
+             <item><property name="text"><string>轮廓洗切模式</string></property></item>
+             <item><property name="text"><string>其他模式</string></property></item>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+
+        <item>
+         <widget class="QLabel" name="lbl_CNC_Features"><property name="text"><string>● 图纸几何特征识别 (Features)</string></property><property name="styleSheet"><string>color: #548AF7; font-weight: bold;</string></property></widget>
+        </item>
+        <item>
+         <widget class="QTableView" name="table_CNC_Features">
+          <property name="minimumSize"><size><width>0</width><height>160</height></size></property>
+          <property name="alternatingRowColors"><bool>true</bool></property>
+         </widget>
+        </item>
+
+        <item>
+         <widget class="QLabel" name="lbl_CNC_Sequence"><property name="text"><string>● 加工工艺清单 (Sequence)</string></property><property name="styleSheet"><string>color: #6AAB73; font-weight: bold;</string></property></widget>
+        </item>
+        <item>
+         <widget class="QTableView" name="table_CNC_Sequence">
+          <property name="minimumSize"><size><width>0</width><height>160</height></size></property>
+         </widget>
+        </item>
+
+        <item>
+         <layout class="QHBoxLayout">
+          <item><widget class="QPushButton" name="btn_CNC_AddStep"><property name="text"><string>+ 添加工艺</string></property><property name="styleSheet"><string>background-color: #388E3C;</string></property></widget></item>
+          <item><widget class="QPushButton" name="btn_CNC_RemoveStep"><property name="text"><string>- 删除选中</string></property><property name="styleSheet"><string>background-color: #C62828;</string></property></widget></item>
+          <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+         </layout>
+        </item>
+
+        <item><spacer><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
        </layout>
       </widget>
+
      </widget>
     </item>
    </layout>
