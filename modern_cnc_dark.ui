@@ -16,11 +16,11 @@
   <property name="styleSheet">
    <string notr="true">
 /* ==============================================
-   康睿智能 CNC - 高级深空灰主题 (硬核连体模块版)
+   康瑞智能 CNC - 高级深空灰主题 (硬核连体模块版)
    ============================================== */
 
 QWidget {
-    background-color: #2B2D30; 
+    background-color: #2B2D30;
     color: #DFE1E5; 
     font-family: &quot;Microsoft YaHei&quot;, &quot;Segoe UI&quot;, sans-serif;
     font-size: 13px;
@@ -31,18 +31,18 @@ QWidget {
    ========================================= */
 QWidget#widget_Sidebar {
     background-color: #1E1F22; 
-    border-right: 2px solid #181A1C; 
+    border-right: 2px solid #181A1C;
 }
 QWidget#widget_SubNav {
     border-bottom: 2px solid #181A1C;
     padding-bottom: 12px;  
 }
 QScrollArea#scrollArea_RightPanel {
-    border: none;          
+    border: none;
     border-left: 2px solid #181A1C;
 }
 QWidget#scrollAreaWidgetContents {
-    background-color: #2B2D30; 
+    background-color: #2B2D30;
 }
 
 /* =========================================
@@ -58,7 +58,7 @@ QWidget#widget_Sidebar QPushButton {
     border: none;
     border-left: 4px solid transparent; 
     border-radius: 0px; 
-    text-align: center; 
+    text-align: center;
     padding: 18px 10px; 
     font-size: 16px;
     color: #A9B0B7; 
@@ -70,7 +70,7 @@ QWidget#widget_Sidebar QPushButton:hover {
 QWidget#widget_Sidebar QPushButton:checked {
     background-color: #2B2D30; 
     color: #548AF7; 
-    border-left: 4px solid #548AF7; 
+    border-left: 4px solid #548AF7;
 }
 QWidget#widget_SubNav QPushButton {
     background-color: #393B40;
@@ -92,7 +92,7 @@ QGroupBox {
     border: 1px solid #43454A;
     border-radius: 6px;
     margin-top: 15px;
-    background-color: #323437; 
+    background-color: #323437;
 }
 QGroupBox::title {
     subcontrol-origin: margin;
@@ -214,7 +214,7 @@ QGroupBox#groupBox_Aux QPushButton:hover {
     border-color: #5E6268;
 }
 QGroupBox#groupBox_Aux QPushButton:checked {
-    background-color: #548AF7; 
+    background-color: #548AF7;
     border: 1px solid #3A6ACC;
     color: #FFFFFF;
 }
@@ -337,6 +337,19 @@ LOGO</string>
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="btn_Nav_CNC">
+         <property name="text">
+          <string>CNC编程</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="btn_Nav_UserParam">
          <property name="text">
           <string>用户参数</string>
@@ -363,19 +376,6 @@ LOGO</string>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="btn_Nav_CNC">
-         <property name="text">
-          <string>CNC编程</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="autoExclusive">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
         <spacer name="verticalSpacer_sidebar">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -392,7 +392,288 @@ LOGO</string>
      </widget>
     </item>
     <item>
+     <layout class="QVBoxLayout" name="verticalLayout_left">
+      <property name="spacing">
+       <number>10</number>
+      </property>
+      <property name="leftMargin">
+       <number>10</number>
+      </property>
+      <property name="topMargin">
+       <number>10</number>
+      </property>
+      <property name="rightMargin">
+       <number>10</number>
+      </property>
+      <property name="bottomMargin">
+       <number>10</number>
+      </property>
+      <item>
+       <widget class="QWidget" name="widget_SubNav" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_subnav">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QPushButton" name="btn_Sub_Main">
+           <property name="text">
+            <string>主控</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_Sub_Edit">
+           <property name="text">
+            <string>编辑</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_Sub_Offset">
+           <property name="text">
+            <string>偏置</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_Sub_Magazine">
+           <property name="text">
+            <string>刀盘</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_Sub_Tool">
+           <property name="text">
+            <string>刀具</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_Sub_GCode">
+           <property name="text">
+            <string>G代码</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_Sub_File">
+           <property name="text">
+            <string>文件</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_sub">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="widget_CAD_Viewer" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>1</horstretch>
+          <verstretch>1</verstretch>
+         </sizepolicy>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_cad">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QGraphicsView" name="graphicsView_CAD">
+           <property name="interactive">
+            <bool>true</bool>
+           </property>
+           <property name="dragMode">
+            <enum>QGraphicsView::ScrollHandDrag</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="widget_BottomInfo" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>150</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>150</height>
+         </size>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_bottom">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QGroupBox" name="groupBox_DRO">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>1</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_DRO">
+            <item row="0" column="0">
+             <widget class="QLabel" name="lbl_X_Title">
+              <property name="text">
+               <string>X</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="lbl_X_Val">
+              <property name="text">
+               <string>0.000</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="lbl_WX_Title">
+              <property name="text">
+               <string>WX</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLabel" name="lbl_WX_Val">
+              <property name="text">
+               <string>0.000</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="lbl_Y_Title">
+              <property name="text">
+               <string>Y</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLabel" name="lbl_Y_Val">
+              <property name="text">
+               <string>0.000</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QLabel" name="lbl_WY_Title">
+              <property name="text">
+               <string>WY</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3">
+             <widget class="QLabel" name="lbl_WY_Val">
+              <property name="text">
+               <string>0.000</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="lbl_Z_Title">
+              <property name="text">
+               <string>Z</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLabel" name="lbl_Z_Val">
+              <property name="text">
+               <string>0.000</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QLabel" name="lbl_WZ_Title">
+              <property name="text">
+               <string>WZ</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="3">
+             <widget class="QLabel" name="lbl_WZ_Val">
+              <property name="text">
+               <string>0.000</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QTextBrowser" name="textBrowser_Log">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>1</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
      <widget class="QStackedWidget" name="stackedWidget_Main">
+      <property name="maximumSize">
+       <size>
+        <width>400</width>
+        <height>16777215</height>
+       </size>
+      </property>
       <property name="currentIndex">
        <number>0</number>
       </property>
@@ -413,274 +694,6 @@ LOGO</string>
         <property name="bottomMargin">
          <number>0</number>
         </property>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_left">
-          <property name="spacing">
-           <number>10</number>
-          </property>
-          <property name="leftMargin">
-           <number>10</number>
-          </property>
-          <property name="topMargin">
-           <number>10</number>
-          </property>
-          <property name="rightMargin">
-           <number>10</number>
-          </property>
-          <property name="bottomMargin">
-           <number>10</number>
-          </property>
-          <item>
-           <widget class="QWidget" name="widget_SubNav" native="true">
-            <layout class="QHBoxLayout" name="horizontalLayout_subnav">
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QPushButton" name="btn_Sub_Main">
-               <property name="text">
-                <string>主控</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="btn_Sub_Offset">
-               <property name="text">
-                <string>偏置</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="btn_Sub_Magazine">
-               <property name="text">
-                <string>刀盘</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="btn_Sub_Tool">
-               <property name="text">
-                <string>刀具</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="btn_Sub_GCode">
-               <property name="text">
-                <string>G代码</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="btn_Sub_File">
-               <property name="text">
-                <string>文件</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_sub">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QWidget" name="widget_CAD_Viewer" native="true">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>1</horstretch>
-              <verstretch>1</verstretch>
-             </sizepolicy>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_cad">
-             <property name="spacing">
-              <number>0</number>
-             </property>
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QGraphicsView" name="graphicsView_CAD">
-               <property name="interactive">
-                <bool>true</bool>
-               </property>
-               <property name="dragMode">
-                <enum>QGraphicsView::ScrollHandDrag</enum>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QWidget" name="widget_BottomInfo" native="true">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>150</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>150</height>
-             </size>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_bottom">
-             <property name="spacing">
-              <number>0</number>
-             </property>
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QGroupBox" name="groupBox_DRO">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                 <horstretch>1</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <layout class="QGridLayout" name="gridLayout_DRO">
-                <item row="0" column="0">
-                 <widget class="QLabel" name="lbl_X_Title">
-                  <property name="text">
-                   <string>X</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QLabel" name="lbl_X_Val">
-                  <property name="text">
-                   <string>0.000</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="2">
-                 <widget class="QLabel" name="lbl_WX_Title">
-                  <property name="text">
-                   <string>WX</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="3">
-                 <widget class="QLabel" name="lbl_WX_Val">
-                  <property name="text">
-                   <string>0.000</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="0">
-                 <widget class="QLabel" name="lbl_Y_Title">
-                  <property name="text">
-                   <string>Y</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QLabel" name="lbl_Y_Val">
-                  <property name="text">
-                   <string>0.000</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="2">
-                 <widget class="QLabel" name="lbl_WY_Title">
-                  <property name="text">
-                   <string>WY</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="3">
-                 <widget class="QLabel" name="lbl_WY_Val">
-                  <property name="text">
-                   <string>0.000</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="0">
-                 <widget class="QLabel" name="lbl_Z_Title">
-                  <property name="text">
-                   <string>Z</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="1">
-                 <widget class="QLabel" name="lbl_Z_Val">
-                  <property name="text">
-                   <string>0.000</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="2">
-                 <widget class="QLabel" name="lbl_WZ_Title">
-                  <property name="text">
-                   <string>WZ</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="3">
-                 <widget class="QLabel" name="lbl_WZ_Val">
-                  <property name="text">
-                   <string>0.000</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <widget class="QTextBrowser" name="textBrowser_Log">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                 <horstretch>1</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
-        </item>
         <item>
          <widget class="QScrollArea" name="scrollArea_RightPanel">
           <property name="maximumSize">
@@ -818,7 +831,7 @@ LOGO</string>
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label">
+                <widget class="QLabel" name="label_feed">
                  <property name="text">
                   <string>进给倍率 (10%)</string>
                  </property>
@@ -841,7 +854,7 @@ LOGO</string>
               </property>
               <layout class="QGridLayout" name="gridLayout_Params">
                <item row="0" column="0">
-                <widget class="QLabel" name="label">
+                <widget class="QLabel" name="label_sp_s">
                  <property name="text">
                   <string>主轴速度:</string>
                  </property>
@@ -858,7 +871,7 @@ LOGO</string>
                 </widget>
                </item>
                <item row="0" column="2">
-                <widget class="QLabel" name="label">
+                <widget class="QLabel" name="label_ms_s">
                  <property name="text">
                   <string>手动速度:</string>
                  </property>
@@ -875,7 +888,7 @@ LOGO</string>
                 </widget>
                </item>
                <item row="1" column="0">
-                <widget class="QLabel" name="label">
+                <widget class="QLabel" name="label_st_n">
                  <property name="text">
                   <string>主轴刀号:</string>
                  </property>
@@ -892,7 +905,7 @@ LOGO</string>
                 </widget>
                </item>
                <item row="1" column="2">
-                <widget class="QLabel" name="label">
+                <widget class="QLabel" name="label_tt_n">
                  <property name="text">
                   <string>目标刀号:</string>
                  </property>
@@ -909,7 +922,7 @@ LOGO</string>
                 </widget>
                </item>
                <item row="2" column="0">
-                <widget class="QLabel" name="label">
+                <widget class="QLabel" name="label_ts_n">
                  <property name="text">
                   <string>刀套号:</string>
                  </property>
@@ -926,7 +939,7 @@ LOGO</string>
                 </widget>
                </item>
                <item row="2" column="2">
-                <widget class="QLabel" name="label">
+                <widget class="QLabel" name="label_ox">
                  <property name="text">
                   <string>偏置 X:</string>
                  </property>
@@ -943,7 +956,7 @@ LOGO</string>
                 </widget>
                </item>
                <item row="3" column="0">
-                <widget class="QLabel" name="label">
+                <widget class="QLabel" name="label_oy">
                  <property name="text">
                   <string>偏置 Y:</string>
                  </property>
@@ -960,7 +973,7 @@ LOGO</string>
                 </widget>
                </item>
                <item row="3" column="2">
-                <widget class="QLabel" name="label">
+                <widget class="QLabel" name="label_oz">
                  <property name="text">
                   <string>偏置 Z:</string>
                  </property>
@@ -1137,9 +1150,9 @@ LOGO</string>
       <widget class="QWidget" name="page_UserParam">
        <layout class="QVBoxLayout">
         <item>
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="label_userp">
           <property name="text">
-           <string>&lt;h1&gt;用户参数页面 (待开发)&lt;/h1&gt;</string>
+           <string>&lt;h1&gt;用户参数设置区&lt;/h1&gt;</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -1151,9 +1164,9 @@ LOGO</string>
       <widget class="QWidget" name="page_SysParam">
        <layout class="QVBoxLayout">
         <item>
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="label_sysp">
           <property name="text">
-           <string>&lt;h1&gt;系统参数页面 (待开发)&lt;/h1&gt;</string>
+           <string>&lt;h1&gt;系统参数设置区&lt;/h1&gt;</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -1165,9 +1178,9 @@ LOGO</string>
       <widget class="QWidget" name="page_CNC">
        <layout class="QVBoxLayout">
         <item>
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="label_cnc">
           <property name="text">
-           <string>&lt;h1&gt;CNC免编程页面 (待开发)&lt;/h1&gt;</string>
+           <string>&lt;h1&gt;CNC免编程逻辑控制区&lt;/h1&gt;</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
