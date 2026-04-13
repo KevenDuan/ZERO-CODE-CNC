@@ -16,7 +16,7 @@
   <property name="styleSheet">
    <string notr="true">
 /* ==============================================
-   康瑞智能 CNC - 高级深空灰主题 (硬核连体模块版)
+   康睿智能 CNC - 高级深空灰主题 (硬核连体模块版)
    ============================================== */
 
 QWidget {
@@ -26,9 +26,6 @@ QWidget {
     font-size: 13px;
 }
 
-/* =========================================
-   全局结构分割线 
-   ========================================= */
 QWidget#widget_Sidebar {
     background-color: #1E1F22; 
     border-right: 2px solid #181A1C;
@@ -45,9 +42,6 @@ QWidget#scrollAreaWidgetContents {
     background-color: #2B2D30;
 }
 
-/* =========================================
-   常规控件样式
-   ========================================= */
 QLabel#lbl_Logo {
     color: #548AF7; 
     font-size: 20px;
@@ -103,24 +97,18 @@ QGroupBox::title {
     font-weight: bold;
 }
 
-/* =========================================
-   核心显示区：CAD 与 底部连体模块
-   ========================================= */
-
-/* CAD 恢复独立的硬核边框感 */
+/* 恢复明确的硬核边框 */
 QWidget#widget_CAD_Viewer {
     background-color: #1E1F22;
     border: 1px solid #43454A;
     border-radius: 6px;
 }
 
-/* 全新增加的 QGraphicsView 样式：去掉丑陋的白边和滚动条 */
 QGraphicsView#graphicsView_CAD {
     background-color: transparent;
     border: none;
 }
 
-/* 左侧坐标框只保留左侧圆角，去掉右边框 */
 QGroupBox#groupBox_DRO {
     background-color: #1E2328; 
     border: 1px solid #43454A;
@@ -148,7 +136,6 @@ QLabel#lbl_WX_Title, QLabel#lbl_WY_Title, QLabel#lbl_WZ_Title {
     qproperty-alignment: AlignCenter; 
 }
 
-/* 右侧日志框拥有完整边框和右侧圆角 */
 QTextBrowser#textBrowser_Log {
     background-color: #1E1F22;
     border: 1px solid #43454A;
@@ -161,9 +148,6 @@ QTextBrowser#textBrowser_Log {
     padding: 10px;
 }
 
-/* =========================================
-   通用按钮及机床控制按钮
-   ========================================= */
 QPushButton {
     background-color: #43454A;
     border: 1px solid #53565C;
@@ -198,9 +182,6 @@ QPushButton#btn_Machine_EStop:hover {
     background-color: #E53935;
 }
 
-/* =========================================
-   外围辅助设备开关 (自锁灯光 Toggle 按钮)
-   ========================================= */
 QGroupBox#groupBox_Aux QPushButton {
     background-color: #2B2D30;
     border: 1px solid #43454A;
@@ -219,9 +200,6 @@ QGroupBox#groupBox_Aux QPushButton:checked {
     color: #FFFFFF;
 }
 
-/* =========================================
-   输入框与滑动条
-   ========================================= */
 QLineEdit {
     background-color: #1E1F22;
     border: 1px solid #43454A;
@@ -256,6 +234,22 @@ QSlider::handle:horizontal {
 }
 QSlider::handle:horizontal:hover {
     background: #FFFFFF;
+}
+
+/* 悬浮小加号按钮样式 (已放大优化) */
+QPushButton#btn_Small_Import {
+    background-color: rgba(84, 138, 247, 0.15); /* 康瑞蓝半透明底色，更显眼 */
+    border: 2px dashed #548AF7; /* 蓝色虚线框 */
+    border-radius: 20px; /* 60x60的一半，呈现完美圆形 */
+    color: #548AF7;
+    font-size: 12px;
+    font-weight: bold;
+    margin: 15px; 
+}
+QPushButton#btn_Small_Import:hover {
+    background-color: #548AF7;
+    border: 2px solid #548AF7;
+    color: #FFFFFF;
 }
    </string>
   </property>
@@ -337,19 +331,6 @@ LOGO</string>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="btn_Nav_CNC">
-         <property name="text">
-          <string>CNC编程</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="autoExclusive">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QPushButton" name="btn_Nav_UserParam">
          <property name="text">
           <string>用户参数</string>
@@ -366,6 +347,19 @@ LOGO</string>
         <widget class="QPushButton" name="btn_Nav_SysParam">
          <property name="text">
           <string>系统参数</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_Nav_CNC">
+         <property name="text">
+          <string>CNC编程</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -466,13 +460,6 @@ LOGO</string>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="btn_Sub_File">
-           <property name="text">
-            <string>文件</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <spacer name="horizontalSpacer_sub">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -501,25 +488,170 @@ LOGO</string>
           <number>0</number>
          </property>
          <property name="leftMargin">
-          <number>0</number>
+          <number>2</number>
          </property>
          <property name="topMargin">
-          <number>0</number>
+          <number>2</number>
          </property>
          <property name="rightMargin">
-          <number>0</number>
+          <number>2</number>
          </property>
          <property name="bottomMargin">
-          <number>0</number>
+          <number>2</number>
          </property>
          <item>
-          <widget class="QGraphicsView" name="graphicsView_CAD">
-           <property name="interactive">
-            <bool>true</bool>
+          <widget class="QStackedWidget" name="stackedWidget_CAD">
+           <property name="currentIndex">
+            <number>0</number>
            </property>
-           <property name="dragMode">
-            <enum>QGraphicsView::ScrollHandDrag</enum>
-           </property>
+           <widget class="QWidget" name="page_EmptyState">
+            <layout class="QVBoxLayout" name="verticalLayout_empty">
+             <item>
+              <spacer name="verticalSpacer_emptyTop">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_emptyBtn">
+               <item>
+                <spacer name="horizontalSpacer_emptyLeft">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btn_Big_Import">
+                 <property name="minimumSize">
+                  <size>
+                   <width>380</width>
+                   <height>100</height>
+                  </size>
+                 </property>
+                 <property name="cursor">
+                  <cursorShape>PointingHandCursor</cursorShape>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">
+QPushButton {
+    background-color: transparent;
+    border: 2px dashed #43454A;
+    border-radius: 12px;
+    color: #A9B0B7;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+QPushButton:hover {
+    background-color: #2B2D30;
+    border: 2px dashed #548AF7;
+    color: #548AF7;
+}
+QPushButton:pressed {
+    background-color: #1E1F22;
+}
+                  </string>
+                 </property>
+                 <property name="text">
+                  <string>➕ 点击此处选择并导入 DXF 图纸</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_emptyRight">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_emptyBottom">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                 </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="page_Viewer">
+            <layout class="QGridLayout" name="gridLayout_viewer">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item row="0" column="0">
+              <widget class="QGraphicsView" name="graphicsView_CAD">
+               <property name="interactive">
+                <bool>true</bool>
+               </property>
+               <property name="dragMode">
+                <enum>QGraphicsView::ScrollHandDrag</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0" alignment="Qt::AlignRight|Qt::AlignTop">
+              <widget class="QPushButton" name="btn_Small_Import">
+               <property name="minimumSize">
+                <size>
+                 <width>70</width>
+                 <height>70</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>70</width>
+                 <height>70</height>
+                </size>
+               </property>
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
+               </property>
+               <property name="toolTip">
+                <string>导入新图纸</string>
+               </property>
+               <property name="text">   
+                <string>➕</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </widget>
          </item>
         </layout>
@@ -668,14 +800,14 @@ LOGO</string>
     </item>
     <item>
      <widget class="QStackedWidget" name="stackedWidget_Main">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
       <property name="maximumSize">
        <size>
         <width>400</width>
         <height>16777215</height>
        </size>
-      </property>
-      <property name="currentIndex">
-       <number>0</number>
       </property>
       <widget class="QWidget" name="page_Process">
        <layout class="QHBoxLayout" name="horizontalLayout_process">
