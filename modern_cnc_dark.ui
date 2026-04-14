@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1440</width>
-    <height>900</height>
+    <width>1600</width>
+    <height>960</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -66,7 +66,7 @@ QWidget#widget_Sidebar QPushButton {
     border-left: 4px solid transparent; 
     border-radius: 0px; 
     text-align: center;
-    padding: 18px 10px; 
+    padding: 20px 12px; 
     font-size: 16px;
     color: #A9B0B7;
 }
@@ -180,6 +180,8 @@ QPushButton#btn_Machine_Start {
     border: 1px solid #2E7D32;
     color: #FFFFFF;
     font-weight: bold;
+    font-size: 18px;
+    padding: 14px 12px;
 }
 QPushButton#btn_Machine_Start:hover {
     background-color: #4CAF50;
@@ -301,13 +303,13 @@ QTableView {
      <widget class="QWidget" name="widget_Sidebar" native="true">
       <property name="minimumSize">
        <size>
-        <width>140</width>
+        <width>156</width>
         <height>0</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
-        <width>140</width>
+        <width>156</width>
         <height>16777215</height>
        </size>
       </property>
@@ -832,7 +834,7 @@ QPushButton:pressed {
       </property>
       <property name="maximumSize">
        <size>
-        <width>400</width>
+        <width>520</width>
         <height>16777215</height>
        </size>
       </property>
@@ -858,7 +860,7 @@ QPushButton:pressed {
          <widget class="QScrollArea" name="scrollArea_RightPanel">
           <property name="maximumSize">
            <size>
-            <width>400</width>
+            <width>520</width>
             <height>16777215</height>
            </size>
           </property>
@@ -870,7 +872,7 @@ QPushButton:pressed {
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>396</width>
+             <width>516</width>
              <height>896</height>
             </rect>
            </property>
@@ -1283,6 +1285,12 @@ QPushButton:pressed {
             </item>
             <item>
              <widget class="QPushButton" name="btn_Machine_Start">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>52</height>
+               </size>
+              </property>
               <property name="text">
                <string>启动</string>
               </property>
