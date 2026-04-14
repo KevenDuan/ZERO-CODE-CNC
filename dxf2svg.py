@@ -118,11 +118,41 @@ def bbox_from_points(points):
     }
 
 
-def centroid_from_points(points):
-    bbox = bbox_from_points(points)
+def centroid_from_points(points, closed=True):
+    if not points:
+        return {"x": 0.0, "y": 0.0}
+
+    if not closed or len(points) < 3:
+        bbox = bbox_from_points(points)
+        return {
+            "x": round((bbox["min_x"] + bbox["max_x"]) / 2.0, 4),
+            "y": round((bbox["min_y"] + bbox["max_y"]) / 2.0, 4),
+        }
+
+    area = 0.0
+    cx = 0.0
+    cy = 0.0
+    count = len(points)
+
+    for index in range(count):
+        p1 = points[index]
+        p2 = points[(index + 1) % count]
+        cross = p1[0] * p2[1] - p2[0] * p1[1]
+        area += cross
+        cx += (p1[0] + p2[0]) * cross
+        cy += (p1[1] + p2[1]) * cross
+
+    area /= 2.0
+    if abs(area) < 1e-9:
+        bbox = bbox_from_points(points)
+        return {
+            "x": round((bbox["min_x"] + bbox["max_x"]) / 2.0, 4),
+            "y": round((bbox["min_y"] + bbox["max_y"]) / 2.0, 4),
+        }
+
     return {
-        "x": round((bbox["min_x"] + bbox["max_x"]) / 2.0, 4),
-        "y": round((bbox["min_y"] + bbox["max_y"]) / 2.0, 4),
+        "x": round(cx / (6.0 * area), 4),
+        "y": round(cy / (6.0 * area), 4),
     }
 
 
@@ -185,7 +215,7 @@ def loop_is_circular(points):
     if len(points) < 8:
         return False, 0.0
 
-    center = centroid_from_points(points)
+    center = centroid_from_points(points, closed=True)
     radii = [distance((center["x"], center["y"]), point) for point in points]
     if not radii:
         return False, 0.0
@@ -289,7 +319,7 @@ def append_open_feature(features, layer, points, notes, geometry=None):
         "layer": layer,
         "closed": False,
         "bbox": bbox,
-        "center": centroid_from_points(points),
+        "center": centroid_from_points(points, closed=False),
         "length": round(sum(distance(points[index], points[index + 1]) for index in range(len(points) - 1)), 4),
         "confidence": "中",
         "notes": f"{notes} 首尾间隙约 {closure_gap:.4f}。",

@@ -117,6 +117,7 @@ MainWindow::MainWindow(QWidget *parent)
     , mSequenceModel(new QStandardItemModel(this))
     , mHighlightItem(nullptr)
     , mSvgItem(nullptr)
+    , mImportProcess(new QProcess(this))
     , mFeatureSelectAllChecked(true)
 {
     ui->setupUi(this);
@@ -217,6 +218,9 @@ void MainWindow::setupConnections()
         this,
         &MainWindow::highlightFeatureRow
     );
+
+    connect(mImportProcess, &QProcess::finished, this, &MainWindow::handleImportProcessFinished);
+    connect(mImportProcess, &QProcess::errorOccurred, this, &MainWindow::handleImportProcessErrorOccurred);
 }
 
 void MainWindow::importDXF()
@@ -229,9 +233,20 @@ void MainWindow::importDXF()
         return;
     }
 
+    startDXFImport(dxfPath);
+}
+
+void MainWindow::startDXFImport(const QString &dxfPath)
+{
+    if (mImportProcess->state() != QProcess::NotRunning) {
+        ui->textBrowser_Log->append("<font color='#FFB74D'>已有 DXF 识别任务正在运行，请稍候。</font>");
+        return;
+    }
+
     const QString tempDir = QDir::tempPath();
-    const QString svgPath = tempDir + "/kr_temp_render.svg";
-    const QString jsonPath = tempDir + "/kr_temp_features.json";
+    mPendingDxfPath = dxfPath;
+    mPendingSvgPath = tempDir + "/kr_temp_render.svg";
+    mPendingJsonPath = tempDir + "/kr_temp_features.json";
     const QString scriptPath = resolvePythonScriptPath();
 
     ui->textBrowser_Log->append("==============================");
@@ -249,36 +264,40 @@ void MainWindow::importDXF()
         pythonProgram = "D:/miniconda3/python.exe";
     }
 
-    QProcess process;
-    process.setProgram(pythonProgram);
-    process.setArguments({scriptPath, dxfPath, svgPath, jsonPath});
-    process.start();
+    mImportProcess->setProgram(pythonProgram);
+    mImportProcess->setArguments({scriptPath, dxfPath, mPendingSvgPath, mPendingJsonPath});
+    mImportProcess->setProcessChannelMode(QProcess::SeparateChannels);
+    setImportUiBusy(true);
+    mImportProcess->start();
+}
 
-    if (!process.waitForStarted()) {
-        QMessageBox::critical(this, "启动失败", "无法启动 Python 解释器:\n" + pythonProgram);
-        return;
-    }
+void MainWindow::setImportUiBusy(bool busy)
+{
+    ui->btn_Big_Import->setEnabled(!busy);
+    ui->btn_Small_Import->setEnabled(!busy);
+}
 
-    process.waitForFinished(-1);
+void MainWindow::handleImportProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
+{
+    setImportUiBusy(false);
 
-    const QString output = QString::fromLocal8Bit(process.readAllStandardOutput()).trimmed();
-    const QString errorOutput = QString::fromLocal8Bit(process.readAllStandardError()).trimmed();
-    const bool processCrashed = process.exitStatus() == QProcess::CrashExit;
-    const bool processFailed = process.exitCode() != 0;
+    const QString output = QString::fromLocal8Bit(mImportProcess->readAllStandardOutput()).trimmed();
+    const QString errorOutput = QString::fromLocal8Bit(mImportProcess->readAllStandardError()).trimmed();
+    const QString scriptPath = resolvePythonScriptPath();
 
-    if (processCrashed || processFailed) {
+    if (exitStatus == QProcess::CrashExit || exitCode != 0) {
         QMessageBox::critical(
             this,
             "识别失败",
             "特征识别脚本异常退出。\n\n脚本路径:\n" + scriptPath
-            + "\n\n退出码: " + QString::number(process.exitCode())
+            + "\n\n退出码: " + QString::number(exitCode)
             + "\n\n标准输出:\n" + output + "\n\n错误输出:\n" + errorOutput
         );
         ui->textBrowser_Log->append("<font color='#FF5252'>DXF 识别脚本异常退出，已中止本次导入。</font>");
         return;
     }
 
-    if (!output.contains("SUCCESS") || !QFileInfo::exists(svgPath) || !QFileInfo::exists(jsonPath)) {
+    if (!output.contains("SUCCESS") || !QFileInfo::exists(mPendingSvgPath) || !QFileInfo::exists(mPendingJsonPath)) {
         QMessageBox::critical(
             this,
             "识别失败",
@@ -289,6 +308,26 @@ void MainWindow::importDXF()
         return;
     }
 
+    processImportResult(mPendingSvgPath, mPendingJsonPath);
+}
+
+void MainWindow::handleImportProcessErrorOccurred(QProcess::ProcessError error)
+{
+    if (error == QProcess::Crashed) {
+        return;
+    }
+
+    setImportUiBusy(false);
+    QMessageBox::critical(
+        this,
+        "识别失败",
+        "DXF 识别进程启动或运行失败。\n\n错误: " + QString::number(static_cast<int>(error))
+    );
+    ui->textBrowser_Log->append("<font color='#FF5252'>DXF 识别进程发生错误，已中止本次导入。</font>");
+}
+
+void MainWindow::processImportResult(const QString &svgPath, const QString &jsonPath)
+{
     QFile jsonFile(jsonPath);
     if (!jsonFile.open(QIODevice::ReadOnly)) {
         QMessageBox::critical(this, "结果读取失败", "无法读取特征结果文件:\n" + jsonPath);

@@ -5,6 +5,7 @@
 #include <QMainWindow>
 #include <QJsonObject>
 #include <QList>
+#include <QProcess>
 
 // 提前声明 UI 命名空间，这是 Qt 的标准做法
 QT_BEGIN_NAMESPACE
@@ -32,6 +33,11 @@ private:
     void setupTables();
     void setupConnections();
     void importDXF();
+    void startDXFImport(const QString &dxfPath);
+    void setImportUiBusy(bool busy);
+    void handleImportProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void handleImportProcessErrorOccurred(QProcess::ProcessError error);
+    void processImportResult(const QString &svgPath, const QString &jsonPath);
     void populateFeatureTable(const QJsonObject &result);
     void appendRecognitionLog(const QJsonObject &result);
     void highlightFeatureRow(const QModelIndex &current, const QModelIndex &previous);
@@ -48,8 +54,12 @@ private:
     QGraphicsPathItem *mHighlightItem;
     QList<QGraphicsItem *> mHighlightMarkers;
     QGraphicsSvgItem *mSvgItem;
+    QProcess *mImportProcess;
     QJsonArray mCurrentFeatures;
     QJsonObject mCurrentPartBBox;
+    QString mPendingDxfPath;
+    QString mPendingSvgPath;
+    QString mPendingJsonPath;
     bool mFeatureSelectAllChecked;
 };
 
