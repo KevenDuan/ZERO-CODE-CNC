@@ -39,6 +39,12 @@ add_executable(${PROJECT_NAME}
     ${DXFLIB_SOURCES}
 )
 
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_CURRENT_SOURCE_DIR}/dxf2svg.py
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>/dxf2svg.py
+)
+
 # ==========================================
 # 将 Qt 的动态链接库完美绑定到程序上 (包含 Svg 和 SvgWidgets)
 # ==========================================

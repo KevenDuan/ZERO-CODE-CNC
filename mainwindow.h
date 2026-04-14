@@ -1,12 +1,21 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QJsonArray>
 #include <QMainWindow>
+#include <QJsonObject>
+#include <QList>
 
 // 提前声明 UI 命名空间，这是 Qt 的标准做法
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
+
+class QGraphicsScene;
+class QGraphicsItem;
+class QGraphicsPathItem;
+class QGraphicsSvgItem;
+class QStandardItemModel;
 
 class MainWindow : public QMainWindow
 {
@@ -17,7 +26,31 @@ public:
     ~MainWindow();
 
 private:
+    QString resolvePythonScriptPath() const;
+    void switchMainPage(int index);
+    void setupCadView();
+    void setupTables();
+    void setupConnections();
+    void importDXF();
+    void populateFeatureTable(const QJsonObject &result);
+    void appendRecognitionLog(const QJsonObject &result);
+    void highlightFeatureRow(const QModelIndex &current, const QModelIndex &previous);
+    void updateFeatureHighlight(int row);
+    void clearFeatureHighlight();
+    QPointF mapDxfPointToScene(const QJsonObject &point) const;
+    QString formatPointText(const QJsonObject &point) const;
+    QString formatSizeText(const QJsonObject &feature) const;
+
     Ui::MainWindow *ui; // 指向由 .ui 文件自动生成的界面类指针
+    QGraphicsScene *mCadScene;
+    QStandardItemModel *mFeatureModel;
+    QStandardItemModel *mSequenceModel;
+    QGraphicsPathItem *mHighlightItem;
+    QList<QGraphicsItem *> mHighlightMarkers;
+    QGraphicsSvgItem *mSvgItem;
+    QJsonArray mCurrentFeatures;
+    QJsonObject mCurrentPartBBox;
+    bool mFeatureSelectAllChecked;
 };
 
 #endif // MAINWINDOW_H
