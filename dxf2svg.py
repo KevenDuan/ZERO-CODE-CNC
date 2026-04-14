@@ -202,13 +202,61 @@ def loop_is_circular(points):
     return is_circular, avg_radius
 
 
+def serialize_point(point):
+    return {"x": round(point[0], 4), "y": round(point[1], 4)}
+
+
 def serialize_points(points, limit=None):
     source_points = points if limit is None else points[:limit]
-    serialized = [{"x": round(point[0], 4), "y": round(point[1], 4)} for point in source_points]
+    serialized = [serialize_point(point) for point in source_points]
     return serialized
 
 
-def append_feature(features, feature_type, layer, points, confidence, notes=None, radius=None):
+def serialize_geometry_segment(segment, reverse=False):
+    if segment["type"] == "line":
+        start = segment["end"] if reverse else segment["start"]
+        end = segment["start"] if reverse else segment["end"]
+        return {
+            "type": "line",
+            "start": serialize_point(start),
+            "end": serialize_point(end),
+        }
+
+    if segment["type"] == "arc":
+        start = segment["end"] if reverse else segment["start"]
+        end = segment["start"] if reverse else segment["end"]
+        start_angle = segment["end_angle"] if reverse else segment["start_angle"]
+        end_angle = segment["start_angle"] if reverse else segment["end_angle"]
+        clockwise = (not segment["clockwise"]) if reverse else segment["clockwise"]
+        return {
+            "type": "arc",
+            "start": serialize_point(start),
+            "end": serialize_point(end),
+            "center": serialize_point(segment["center"]),
+            "radius": round(segment["radius"], 4),
+            "start_angle": round(start_angle, 4),
+            "end_angle": round(end_angle, 4),
+            "clockwise": clockwise,
+        }
+
+    if segment["type"] == "circle":
+        return {
+            "type": "circle",
+            "center": serialize_point(segment["center"]),
+            "radius": round(segment["radius"], 4),
+        }
+
+    spline_points = list(reversed(segment["points"])) if reverse else list(segment["points"])
+    result = {
+        "type": "spline",
+        "points": serialize_points(spline_points),
+    }
+    if "degree" in segment:
+        result["degree"] = segment["degree"]
+    return result
+
+
+def append_feature(features, feature_type, layer, points, confidence, notes=None, radius=None, geometry=None):
     bbox = bbox_from_points(points)
     center = centroid_from_points(points)
     feature = {
@@ -222,6 +270,7 @@ def append_feature(features, feature_type, layer, points, confidence, notes=None
         "confidence": confidence,
         "notes": notes or "",
         "points": serialize_points(points),
+        "geometry": geometry or [],
     }
     if radius is not None:
         feature["radius"] = round(radius, 4)
@@ -229,7 +278,7 @@ def append_feature(features, feature_type, layer, points, confidence, notes=None
     features.append(feature)
 
 
-def append_open_feature(features, layer, points, notes):
+def append_open_feature(features, layer, points, notes, geometry=None):
     bbox = bbox_from_points(points)
     start_point = points[0]
     end_point = points[-1]
@@ -245,6 +294,7 @@ def append_open_feature(features, layer, points, notes):
         "confidence": "中",
         "notes": f"{notes} 首尾间隙约 {closure_gap:.4f}。",
         "points": serialize_points(points),
+        "geometry": geometry or [],
         "start_point": {"x": round(start_point[0], 4), "y": round(start_point[1], 4)},
         "end_point": {"x": round(end_point[0], 4), "y": round(end_point[1], 4)},
         "closure_gap": closure_gap,
@@ -264,6 +314,62 @@ def append_entity_debug_warning(warnings, entity_stats, unsupported_stats):
             f"{entity_type}:{count}" for entity_type, count in sorted(unsupported_stats.items())
         )
         warnings.append(f"存在当前未处理实体: {unsupported_summary}")
+
+
+def polyline_geometry_from_virtual_entities(entity):
+    points = []
+    geometry_segments = []
+
+    for child in entity.virtual_entities():
+        child_type = child.dxftype()
+        if child_type == "LINE":
+            segment = {
+                "type": "line",
+                "start": (float(child.dxf.start.x), float(child.dxf.start.y)),
+                "end": (float(child.dxf.end.x), float(child.dxf.end.y)),
+            }
+        elif child_type == "ARC":
+            center = (float(child.dxf.center.x), float(child.dxf.center.y))
+            radius = float(child.dxf.radius)
+            start_angle = float(child.dxf.start_angle)
+            end_angle = float(child.dxf.end_angle)
+            segment = {
+                "type": "arc",
+                "start": (
+                    center[0] + radius * math.cos(math.radians(start_angle)),
+                    center[1] + radius * math.sin(math.radians(start_angle)),
+                ),
+                "end": (
+                    center[0] + radius * math.cos(math.radians(end_angle)),
+                    center[1] + radius * math.sin(math.radians(end_angle)),
+                ),
+                "center": center,
+                "radius": radius,
+                "start_angle": start_angle,
+                "end_angle": end_angle,
+                "clockwise": False,
+            }
+        elif child_type == "SPLINE":
+            spline_points = sample_spline_points(child)
+            if len(spline_points) < 2:
+                continue
+            segment = {
+                "type": "spline",
+                "start": spline_points[0],
+                "end": spline_points[-1],
+                "points": spline_points,
+                "degree": int(getattr(child.dxf, "degree", 3)),
+            }
+        else:
+            continue
+
+        segment_points = sample_segment(segment)
+        if points and segment_points and distance(points[-1], segment_points[0]) <= TOLERANCE:
+            segment_points = segment_points[1:]
+        points.extend(segment_points)
+        geometry_segments.append(serialize_geometry_segment(segment))
+
+    return dedupe_points(points), geometry_segments
 
 
 def extract_entities(msp):
@@ -287,6 +393,7 @@ def extract_entities(msp):
                 "points": dedupe_points(points),
                 "source": "circle",
                 "radius": radius,
+                "geometry": [serialize_geometry_segment({"type": "circle", "center": center, "radius": radius})],
             })
         elif entity_type == "LINE":
             loose_segments.append({
@@ -324,6 +431,13 @@ def extract_entities(msp):
             if len(points) < 2:
                 unsupported_stats[entity_type] += 1
                 continue
+            spline_segment = {
+                "type": "spline",
+                "start": points[0],
+                "end": points[-1],
+                "points": points,
+                "degree": int(getattr(entity.dxf, "degree", 3)),
+            }
             if is_closed_entity(entity) or distance(points[0], points[-1]) <= TOLERANCE:
                 if distance(points[0], points[-1]) > TOLERANCE:
                     points.append(points[0])
@@ -332,17 +446,15 @@ def extract_entities(msp):
                     "points": dedupe_points(points),
                     "source": "spline",
                     "radius": None,
+                    "geometry": [serialize_geometry_segment(spline_segment)],
                 })
             else:
                 loose_segments.append({
-                    "type": "spline",
                     "layer": layer,
-                    "start": points[0],
-                    "end": points[-1],
-                    "points": points,
+                    **spline_segment,
                 })
         elif entity_type in ("LWPOLYLINE", "POLYLINE"):
-            points = polyline_points_from_virtual_entities(entity)
+            points, geometry_segments = polyline_geometry_from_virtual_entities(entity)
             if len(points) < 2:
                 continue
             if is_closed_entity(entity):
@@ -353,12 +465,14 @@ def extract_entities(msp):
                     "points": dedupe_points(points),
                     "source": entity_type.lower(),
                     "radius": None,
+                    "geometry": geometry_segments,
                 })
             else:
                 open_polylines.append({
                     "layer": layer,
                     "points": dedupe_points(points),
                     "source": entity_type.lower(),
+                    "geometry": geometry_segments,
                 })
         else:
             unsupported_stats[entity_type] += 1
@@ -553,6 +667,7 @@ def build_loose_chains(loose_segments, capture_debug=False):
 
             current_node = start_node
             points = []
+            geometry = []
             prev_direction = None
             chain_progress = 0
             step_guard = 0
@@ -595,21 +710,28 @@ def build_loose_chains(loose_segments, capture_debug=False):
                 pending.remove(next_index)
                 chain_progress += 1
                 from_node = current_node
+                geometry_segment = serialize_geometry_segment(loose_segments[next_index], reverse=reverse)
+                appended_to_existing = False
 
                 connection_tol = max(TOLERANCE, CONNECT_TOLERANCE)
                 if points and distance(points[-1], segment_points[0]) <= connection_tol:
                     segment_points = segment_points[1:]
+                    appended_to_existing = True
                 elif points:
                     # 保护性分段：不强行连接不连续段，避免出现虚假的跨段直线。
                     points = dedupe_points(points)
                     if len(points) >= 2:
-                        chains.append({"layer": layer, "points": points})
+                        chains.append({"layer": layer, "points": points, "geometry": geometry})
                     points = segment_points
+                    geometry = [geometry_segment]
+                    appended_to_existing = None
 
                 if not points:
                     points = segment_points
-                else:
+                    geometry = [geometry_segment]
+                elif appended_to_existing:
                     points.extend(segment_points)
+                    geometry.append(geometry_segment)
                 prev_direction = next_direction
 
                 if reverse:
@@ -636,7 +758,7 @@ def build_loose_chains(loose_segments, capture_debug=False):
 
             points = dedupe_points(points)
             if len(points) >= 2:
-                chains.append({"layer": layer, "points": points})
+                chains.append({"layer": layer, "points": points, "geometry": geometry})
                 if chain_trace is not None:
                     chain_trace["points_count"] = len(points)
                     chain_debug.append(chain_trace)
@@ -649,7 +771,11 @@ def build_loose_chains(loose_segments, capture_debug=False):
                 fallback_points = sample_segment(loose_segments[fallback_index])
                 fallback_points = dedupe_points(fallback_points)
                 if len(fallback_points) >= 2:
-                    chains.append({"layer": layer, "points": fallback_points})
+                    chains.append({
+                        "layer": layer,
+                        "points": fallback_points,
+                        "geometry": [serialize_geometry_segment(loose_segments[fallback_index])],
+                    })
                 if chain_trace is not None:
                     chain_trace["stop_reason"] = "fallback"
                     chain_trace["points_count"] = len(fallback_points)
@@ -682,6 +808,7 @@ def recognize_features(dxf_path):
                 "points": points,
                 "source": loop["source"],
                 "radius": loop["radius"],
+                "geometry": loop.get("geometry", []),
             })
 
     open_features = []
@@ -695,11 +822,13 @@ def recognize_features(dxf_path):
                 "points": chain_points[:-1] if distance(chain_points[0], chain_points[-1]) <= TOLERANCE else chain_points,
                 "source": "loose_chain",
                 "radius": None,
+                "geometry": chain.get("geometry", []),
             })
         else:
             open_features.append({
                 "layer": chain["layer"],
                 "points": chain_points,
+                "geometry": chain.get("geometry", []),
             })
 
     loop_records = []
@@ -717,6 +846,7 @@ def recognize_features(dxf_path):
             "is_circular": candidate["source"] == "circle" or is_circular,
             "area": area,
             "center": (center["x"], center["y"]),
+            "geometry": candidate.get("geometry", []),
         })
 
     features = []
@@ -745,6 +875,7 @@ def recognize_features(dxf_path):
                 confidence,
                 notes=notes,
                 radius=record["radius"],
+                geometry=record["geometry"],
             )
         else:
             contain_level = len(containing)
@@ -760,10 +891,24 @@ def recognize_features(dxf_path):
                 feature_type = "岛"
                 confidence = "中"
                 notes = "位于内轮廓内部，可能是保留岛或嵌套外轮廓。"
-            append_feature(features, feature_type, record["layer"], record["points"], confidence, notes=notes)
+            append_feature(
+                features,
+                feature_type,
+                record["layer"],
+                record["points"],
+                confidence,
+                notes=notes,
+                geometry=record["geometry"],
+            )
 
     for open_feature in open_features:
-        append_open_feature(features, open_feature["layer"], open_feature["points"], "检测到未闭合图元链，暂不能直接生成完整加工轮廓。")
+        append_open_feature(
+            features,
+            open_feature["layer"],
+            open_feature["points"],
+            "检测到未闭合图元链，暂不能直接生成完整加工轮廓。",
+            geometry=open_feature.get("geometry", []),
+        )
         warnings.append(f"图层 {open_feature['layer']} 存在未闭合轮廓。")
 
     all_points = []
