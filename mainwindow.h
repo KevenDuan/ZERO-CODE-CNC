@@ -26,6 +26,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
+
 private:
     QString resolvePythonScriptPath() const;
     void switchMainPage(int index);
@@ -33,6 +36,7 @@ private:
     void setupCadView();
     void setupTables();
     void setupConnections();
+    void updateFeatureTableColumnWidths();
     void importDXF();
     void startDXFImport(const QString &dxfPath);
     void setImportUiBusy(bool busy);

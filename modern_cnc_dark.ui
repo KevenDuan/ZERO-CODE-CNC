@@ -838,13 +838,13 @@ QPushButton:pressed {
          <widget class="QWidget" name="widget_CNC_RightPanel" native="true">
           <property name="minimumSize">
            <size>
-            <width>520</width>
+            <width>640</width>
             <height>0</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
-            <width>520</width>
+            <width>640</width>
             <height>16777215</height>
            </size>
           </property>

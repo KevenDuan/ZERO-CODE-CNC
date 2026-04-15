@@ -26,6 +26,8 @@
 #include <QProcess>
 #include <QPushButton>
 #include <QStandardItemModel>
+#include <QTimer>
+#include <QMouseEvent>
 #include <QWheelEvent>
 
 // 滚轮缩放拦截器
@@ -138,6 +140,32 @@ void MainWindow::switchCncPanelPage(int index)
     ui->stackedWidget_CNC_Panel->setCurrentIndex(index);
     ui->btn_CNC_ShowFeaturePage->setChecked(index == 0);
     ui->btn_CNC_ShowSequencePage->setChecked(index == 1);
+    if (index == 0) {
+        QTimer::singleShot(0, this, &MainWindow::updateFeatureTableColumnWidths);
+    }
+}
+
+bool MainWindow::eventFilter(QObject *watched, QEvent *event)
+{
+    if (watched == ui->table_CNC_Features->viewport() && event->type() == QEvent::MouseButtonRelease) {
+        auto *mouseEvent = static_cast<QMouseEvent *>(event);
+        const QModelIndex index = ui->table_CNC_Features->indexAt(mouseEvent->pos());
+        if (index.isValid() && index.column() == 0) {
+            if (QStandardItem *item = mFeatureModel->item(index.row(), 0)) {
+                const Qt::CheckState nextState =
+                    item->checkState() == Qt::Checked ? Qt::Unchecked : Qt::Checked;
+                item->setCheckState(nextState);
+                ui->table_CNC_Features->selectRow(index.row());
+                return true;
+            }
+        }
+    }
+
+    if ((watched == ui->table_CNC_Features || watched == ui->table_CNC_Features->viewport())
+        && event->type() == QEvent::Resize) {
+        updateFeatureTableColumnWidths();
+    }
+    return QMainWindow::eventFilter(watched, event);
 }
 
 MainWindow::MainWindow(QWidget *parent)
@@ -187,12 +215,12 @@ void MainWindow::setupTables()
         QAbstractItemView::DoubleClicked | QAbstractItemView::SelectedClicked | QAbstractItemView::EditKeyPressed
     );
     ui->table_CNC_Features->setFont(tableFont);
+    ui->table_CNC_Features->installEventFilter(this);
+    ui->table_CNC_Features->viewport()->installEventFilter(this);
     auto *featureHeader = ui->table_CNC_Features->horizontalHeader();
     featureHeader->setStretchLastSection(false);
-    for (int column = 0; column < 6; ++column) {
-        featureHeader->setSectionResizeMode(column, QHeaderView::ResizeToContents);
-    }
-    featureHeader->setSectionResizeMode(6, QHeaderView::Stretch);
+    featureHeader->setSectionResizeMode(QHeaderView::Fixed);
+    updateFeatureTableColumnWidths();
     ui->table_CNC_Features->verticalHeader()->setVisible(false);
     ui->table_CNC_Features->setStyleSheet(
         "QTableView {"
@@ -227,6 +255,21 @@ void MainWindow::setupTables()
     ui->table_CNC_Sequence->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->table_CNC_Sequence->verticalHeader()->setVisible(false);
     ui->table_CNC_Sequence->setStyleSheet(ui->table_CNC_Features->styleSheet());
+    QTimer::singleShot(0, this, &MainWindow::updateFeatureTableColumnWidths);
+}
+
+void MainWindow::updateFeatureTableColumnWidths()
+{
+    ui->table_CNC_Features->setColumnWidth(0, 58);
+    ui->table_CNC_Features->setColumnWidth(1, 58);
+    ui->table_CNC_Features->setColumnWidth(2, 90);
+    ui->table_CNC_Features->setColumnWidth(3, 96);
+    ui->table_CNC_Features->setColumnWidth(4, 110);
+    ui->table_CNC_Features->setColumnWidth(5, 110);
+
+    const int fixedColumnsWidth = 58 + 58 + 90 + 96 + 110 + 110;
+    const int processWidth = std::max(98, ui->table_CNC_Features->viewport()->width() - fixedColumnsWidth - 2);
+    ui->table_CNC_Features->horizontalHeader()->resizeSection(6, processWidth);
 }
 
 void MainWindow::setupConnections()
@@ -473,9 +516,8 @@ void MainWindow::populateFeatureTable(const QJsonObject &result)
         mFeatureModel->appendRow(rowItems);
     }
 
-    ui->table_CNC_Features->resizeColumnsToContents();
     ui->table_CNC_Features->resizeRowsToContents();
-    ui->table_CNC_Features->horizontalHeader()->resizeSection(6, ui->table_CNC_Features->viewport()->width() / 3);
+    updateFeatureTableColumnWidths();
     ui->table_CNC_Features->viewport()->update();
     if (mFeatureModel->rowCount() > 0) {
         ui->table_CNC_Features->selectRow(0);
