@@ -1,6 +1,7 @@
 import json
 import math
 import os
+import re
 import sys
 from collections import Counter
 
@@ -13,6 +14,8 @@ from ezdxf.addons.drawing.svg import SVGBackend
 TOLERANCE = 0.05
 CONNECT_TOLERANCE = 0.2
 ARC_SEGMENTS = 24
+SVG_BACKGROUND_COLOR = "#2B2D30"
+SVG_STROKE_COLOR = "#ff7f7f"
 
 
 def distance(p1, p2):
@@ -983,10 +986,24 @@ def convert_dxf_to_svg(dxf_path, svg_path):
 
     page = Page(0, 0)
     svg_string = backend.get_string(page)
-    svg_string = svg_string.replace('stroke="#000000"', 'stroke="#FF5252"')
-    svg_string = svg_string.replace('stroke="#ffffff"', 'stroke="#FF5252"')
-    svg_string = svg_string.replace('stroke="black"', 'stroke="#FF5252"')
-    svg_string = svg_string.replace('stroke="white"', 'stroke="#FF5252"')
+    svg_string = re.sub(
+        r'(<rect\b[^>]*\bfill=")(#[0-9a-fA-F]{6})(")',
+        rf"\1{SVG_BACKGROUND_COLOR}\3",
+        svg_string,
+        count=1,
+    )
+    svg_string = re.sub(
+        r"stroke:\s*(#[0-9a-fA-F]{6}|black|white)",
+        f"stroke: {SVG_STROKE_COLOR}",
+        svg_string,
+        flags=re.IGNORECASE,
+    )
+    svg_string = re.sub(
+        r'stroke="(#[0-9a-fA-F]{6}|black|white)"',
+        f'stroke="{SVG_STROKE_COLOR}"',
+        svg_string,
+        flags=re.IGNORECASE,
+    )
 
     with open(svg_path, "wt", encoding="utf-8") as fp:
         fp.write(svg_string)
