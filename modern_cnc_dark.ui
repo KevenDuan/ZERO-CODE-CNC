@@ -307,7 +307,7 @@ QTableView {
      <widget class="QWidget" name="widget_Sidebar" native="true">
       <property name="minimumSize">
        <size>
-        <width>140</width>
+        <width>145</width>
         <height>0</height>
        </size>
       </property>
