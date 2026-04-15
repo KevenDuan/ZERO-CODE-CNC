@@ -29,6 +29,7 @@ public:
 private:
     QString resolvePythonScriptPath() const;
     void switchMainPage(int index);
+    void switchCncPanelPage(int index);
     void setupCadView();
     void setupTables();
     void setupConnections();
@@ -40,9 +41,14 @@ private:
     void processImportResult(const QString &svgPath, const QString &jsonPath);
     void populateFeatureTable(const QJsonObject &result);
     void appendRecognitionLog(const QJsonObject &result);
+    void generateSequenceFromSelectedFeatures();
+    void deleteSelectedSequenceRows();
     void highlightFeatureRow(const QModelIndex &current, const QModelIndex &previous);
     void updateFeatureHighlight(int row);
     void clearFeatureHighlight();
+    QList<int> checkedRows(const QStandardItemModel *model) const;
+    QString defaultProcessForFeature(const QJsonObject &feature) const;
+    QString defaultToolNameForFeature(const QJsonObject &feature) const;
     QPointF mapDxfPointToScene(const QJsonObject &point) const;
     QString formatPointText(const QJsonObject &point) const;
     QString formatSizeText(const QJsonObject &feature) const;
@@ -61,6 +67,7 @@ private:
     QString mPendingSvgPath;
     QString mPendingJsonPath;
     bool mFeatureSelectAllChecked;
+    bool mSequenceSelectAllChecked;
 };
 
 #endif // MAINWINDOW_H

@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_modern_cnc_dark.h"
 
+#include <algorithm>
 #include <QCoreApplication>
 #include <QDir>
 #include <QEvent>
@@ -78,6 +79,25 @@ QStandardItem *makeCell(const QString &text, const QString &type = QString())
     }
     return item;
 }
+
+QStandardItem *makeEditableCell(const QString &text)
+{
+    auto *item = new QStandardItem(text);
+    item->setEditable(true);
+    item->setTextAlignment(Qt::AlignCenter);
+    return item;
+}
+
+QStandardItem *makeCheckableIndexCell(int index, int dataValue)
+{
+    auto *item = new QStandardItem(QString::number(index));
+    item->setCheckable(true);
+    item->setCheckState(Qt::Checked);
+    item->setEditable(false);
+    item->setTextAlignment(Qt::AlignCenter);
+    item->setData(dataValue, Qt::UserRole);
+    return item;
+}
 } // namespace
 
 QString MainWindow::resolvePythonScriptPath() const
@@ -107,6 +127,17 @@ void MainWindow::switchMainPage(int index)
     ui->btn_Nav_UserParam->setChecked(index == 1);
     ui->btn_Nav_SysParam->setChecked(index == 2);
     ui->btn_Nav_CNC->setChecked(index == 3);
+    ui->btn_Nav_Edit->setChecked(index == 4);
+    ui->btn_Nav_Offset->setChecked(index == 5);
+    ui->btn_Nav_Magazine->setChecked(index == 6);
+    ui->btn_Nav_Tool->setChecked(index == 7);
+}
+
+void MainWindow::switchCncPanelPage(int index)
+{
+    ui->stackedWidget_CNC_Panel->setCurrentIndex(index);
+    ui->btn_CNC_ShowFeaturePage->setChecked(index == 0);
+    ui->btn_CNC_ShowSequencePage->setChecked(index == 1);
 }
 
 MainWindow::MainWindow(QWidget *parent)
@@ -119,6 +150,7 @@ MainWindow::MainWindow(QWidget *parent)
     , mSvgItem(nullptr)
     , mImportProcess(new QProcess(this))
     , mFeatureSelectAllChecked(true)
+    , mSequenceSelectAllChecked(true)
 {
     ui->setupUi(this);
     setupCadView();
@@ -146,14 +178,21 @@ void MainWindow::setupTables()
     QFont tableFont = ui->table_CNC_Features->font();
     tableFont.setPointSize(9);
 
-    mFeatureModel->setHorizontalHeaderLabels({"选择", "编号", "类型", "图层", "尺寸", "中心", "置信度", "说明"});
+    mFeatureModel->setHorizontalHeaderLabels({"序号", "个数", "直径", "孔深", "深度余量", "侧边余量", "工艺"});
     ui->table_CNC_Features->setModel(mFeatureModel);
     ui->table_CNC_Features->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->table_CNC_Features->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->table_CNC_Features->setAlternatingRowColors(false);
+    ui->table_CNC_Features->setEditTriggers(
+        QAbstractItemView::DoubleClicked | QAbstractItemView::SelectedClicked | QAbstractItemView::EditKeyPressed
+    );
     ui->table_CNC_Features->setFont(tableFont);
-    ui->table_CNC_Features->horizontalHeader()->setStretchLastSection(true);
-    ui->table_CNC_Features->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    auto *featureHeader = ui->table_CNC_Features->horizontalHeader();
+    featureHeader->setStretchLastSection(false);
+    for (int column = 0; column < 6; ++column) {
+        featureHeader->setSectionResizeMode(column, QHeaderView::ResizeToContents);
+    }
+    featureHeader->setSectionResizeMode(6, QHeaderView::Stretch);
     ui->table_CNC_Features->verticalHeader()->setVisible(false);
     ui->table_CNC_Features->setStyleSheet(
         "QTableView {"
@@ -173,10 +212,16 @@ void MainWindow::setupTables()
         "}"
     );
 
-    mSequenceModel->setHorizontalHeaderLabels({"选择", "工艺", "目标特征", "说明"});
+    mSequenceModel->setHorizontalHeaderLabels(
+        {"序号", "方式", "刀具名称", "刀号", "转速", "进给", "刀具步进", "加工深度", "每层切深", "起深", "侧面余量", "底面余量", "加工提示"}
+    );
     ui->table_CNC_Sequence->setModel(mSequenceModel);
     ui->table_CNC_Sequence->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->table_CNC_Sequence->setSelectionMode(QAbstractItemView::ExtendedSelection);
     ui->table_CNC_Sequence->setAlternatingRowColors(false);
+    ui->table_CNC_Sequence->setEditTriggers(
+        QAbstractItemView::DoubleClicked | QAbstractItemView::SelectedClicked | QAbstractItemView::EditKeyPressed
+    );
     ui->table_CNC_Sequence->setFont(tableFont);
     ui->table_CNC_Sequence->horizontalHeader()->setStretchLastSection(true);
     ui->table_CNC_Sequence->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
@@ -189,14 +234,17 @@ void MainWindow::setupConnections()
     connect(ui->btn_Big_Import, &QPushButton::clicked, this, &MainWindow::importDXF);
     connect(ui->btn_Small_Import, &QPushButton::clicked, this, &MainWindow::importDXF);
 
-    connect(ui->btn_Sub_Edit, &QPushButton::clicked, this, [this]() {
-        ui->textBrowser_Log->append("进入图纸编辑/修改模式...");
-    });
-
     connect(ui->btn_Nav_Process, &QPushButton::clicked, this, [this]() { switchMainPage(0); });
     connect(ui->btn_Nav_UserParam, &QPushButton::clicked, this, [this]() { switchMainPage(1); });
     connect(ui->btn_Nav_SysParam, &QPushButton::clicked, this, [this]() { switchMainPage(2); });
     connect(ui->btn_Nav_CNC, &QPushButton::clicked, this, [this]() { switchMainPage(3); });
+    connect(ui->btn_Nav_Edit, &QPushButton::clicked, this, [this]() { switchMainPage(4); });
+    connect(ui->btn_Nav_Offset, &QPushButton::clicked, this, [this]() { switchMainPage(5); });
+    connect(ui->btn_Nav_Magazine, &QPushButton::clicked, this, [this]() { switchMainPage(6); });
+    connect(ui->btn_Nav_Tool, &QPushButton::clicked, this, [this]() { switchMainPage(7); });
+
+    connect(ui->btn_CNC_ShowFeaturePage, &QPushButton::clicked, this, [this]() { switchCncPanelPage(0); });
+    connect(ui->btn_CNC_ShowSequencePage, &QPushButton::clicked, this, [this]() { switchCncPanelPage(1); });
 
     connect(ui->btn_CNC_FeatureSelectAll, &QPushButton::clicked, this, [this]() {
         for (int row = 0; row < mFeatureModel->rowCount(); ++row) {
@@ -207,9 +255,29 @@ void MainWindow::setupConnections()
         mFeatureSelectAllChecked = !mFeatureSelectAllChecked;
     });
 
+    connect(ui->btn_CNC_GenerateProcess, &QPushButton::clicked, this, &MainWindow::generateSequenceFromSelectedFeatures);
+
+    connect(ui->btn_CNC_SeqSelectAll, &QPushButton::clicked, this, [this]() {
+        for (int row = 0; row < mSequenceModel->rowCount(); ++row) {
+            if (auto *item = mSequenceModel->item(row, 0)) {
+                item->setCheckState(mSequenceSelectAllChecked ? Qt::Unchecked : Qt::Checked);
+            }
+        }
+        mSequenceSelectAllChecked = !mSequenceSelectAllChecked;
+    });
+
+    connect(ui->btn_CNC_SeqDelete, &QPushButton::clicked, this, &MainWindow::deleteSelectedSequenceRows);
+
     connect(ui->btn_CNC_SeqClear, &QPushButton::clicked, this, [this]() {
         mSequenceModel->removeRows(0, mSequenceModel->rowCount());
+        mSequenceSelectAllChecked = true;
         ui->textBrowser_Log->append("工艺序列表已清空。");
+    });
+
+    connect(ui->btn_CNC_GenerateCode, &QPushButton::clicked, this, [this]() {
+        ui->textBrowser_Log->append(
+            QString("当前工序列表共 %1 条，代码生成功能可在下一步继续接入。").arg(mSequenceModel->rowCount())
+        );
     });
 
     connect(
@@ -351,11 +419,14 @@ void MainWindow::processImportResult(const QString &svgPath, const QString &json
     clearFeatureHighlight();
     mSvgItem = nullptr;
     mCadScene->clear();
+    mSequenceModel->removeRows(0, mSequenceModel->rowCount());
+    mSequenceSelectAllChecked = true;
     mSvgItem = new QGraphicsSvgItem(svgPath);
     mCadScene->addItem(mSvgItem);
 
     ui->stackedWidget_CAD->setCurrentIndex(1);
     switchMainPage(3);
+    switchCncPanelPage(0);
     QCoreApplication::processEvents();
 
     const QRectF bounds = mSvgItem->boundingRect();
@@ -367,6 +438,12 @@ void MainWindow::processImportResult(const QString &svgPath, const QString &json
     const QJsonObject result = jsonDoc.object();
     mCurrentFeatures = result.value("features").toArray();
     mCurrentPartBBox = result.value("part_bbox").toObject();
+    ui->label_CNC_FileNameValue->setText(result.value("file_name").toString());
+    ui->label_CNC_SizeValue->setText(
+        QString("%1 x %2")
+            .arg(mCurrentPartBBox.value("width").toDouble(), 0, 'f', 3)
+            .arg(mCurrentPartBBox.value("height").toDouble(), 0, 'f', 3)
+    );
     populateFeatureTable(result);
     appendRecognitionLog(result);
     ui->textBrowser_Log->append("<font color='#6AAB73'>图纸渲染与特征识别完成。</font>");
@@ -377,43 +454,117 @@ void MainWindow::populateFeatureTable(const QJsonObject &result)
     mFeatureModel->removeRows(0, mFeatureModel->rowCount());
     mFeatureSelectAllChecked = false;
 
-    const QJsonObject partBBox = result.value("part_bbox").toObject();
-    ui->edit_CNC_PartLength->setText(QString::number(partBBox.value("width").toDouble(), 'f', 3));
-    ui->edit_CNC_PartWidth->setText(QString::number(partBBox.value("height").toDouble(), 'f', 3));
-
     const QJsonArray features = result.value("features").toArray();
     for (int index = 0; index < features.size(); ++index) {
         const QJsonValue &featureValue = features.at(index);
         const QJsonObject feature = featureValue.toObject();
-        const QString type = feature.value("type").toString();
-
-        auto *checkItem = new QStandardItem();
-        checkItem->setCheckable(true);
-        checkItem->setCheckState(Qt::Checked);
-        checkItem->setEditable(false);
-        checkItem->setTextAlignment(Qt::AlignCenter);
+        const QString diameterText = feature.contains("diameter")
+            ? QString::number(feature.value("diameter").toDouble(), 'f', 3)
+            : "-";
 
         QList<QStandardItem *> rowItems;
-        rowItems << checkItem
-                 << makeCell(feature.value("id").toString(), type)
-                 << makeCell(type, type)
-                 << makeCell(feature.value("layer").toString(), type)
-                 << makeCell(formatSizeText(feature), type)
-                 << makeCell(formatPointText(feature.value("center").toObject()), type)
-                 << makeCell(feature.value("confidence").toString(), type)
-                 << makeCell(feature.value("notes").toString(), type);
+        rowItems << makeCheckableIndexCell(index + 1, index)
+                 << makeCell("1")
+                 << makeCell(diameterText)
+                 << makeEditableCell("0.000")
+                 << makeEditableCell("0.000")
+                 << makeEditableCell("0.000")
+                 << makeEditableCell(defaultProcessForFeature(feature));
         mFeatureModel->appendRow(rowItems);
-
-        if (auto *idItem = mFeatureModel->item(index, 1)) {
-            idItem->setData(index, Qt::UserRole);
-        }
     }
 
+    ui->table_CNC_Features->resizeColumnsToContents();
     ui->table_CNC_Features->resizeRowsToContents();
+    ui->table_CNC_Features->horizontalHeader()->resizeSection(6, ui->table_CNC_Features->viewport()->width() / 3);
+    ui->table_CNC_Features->viewport()->update();
     if (mFeatureModel->rowCount() > 0) {
         ui->table_CNC_Features->selectRow(0);
         updateFeatureHighlight(0);
     }
+}
+
+void MainWindow::generateSequenceFromSelectedFeatures()
+{
+    const QList<int> rows = checkedRows(mFeatureModel);
+    if (rows.isEmpty()) {
+        ui->textBrowser_Log->append("<font color='#FFB74D'>请先在列表页面勾选要生成工艺的项目。</font>");
+        return;
+    }
+
+    mSequenceModel->removeRows(0, mSequenceModel->rowCount());
+
+    for (int sequenceIndex = 0; sequenceIndex < rows.size(); ++sequenceIndex) {
+        const int row = rows.at(sequenceIndex);
+        const auto *indexItem = mFeatureModel->item(row, 0);
+        if (!indexItem) {
+            continue;
+        }
+        const int featureIndex = indexItem->data(Qt::UserRole).toInt();
+        if (featureIndex < 0 || featureIndex >= mCurrentFeatures.size()) {
+            continue;
+        }
+
+        const QJsonObject feature = mCurrentFeatures.at(featureIndex).toObject();
+        const QString process = mFeatureModel->item(row, 6) ? mFeatureModel->item(row, 6)->text() : defaultProcessForFeature(feature);
+        const QString depth = mFeatureModel->item(row, 3) ? mFeatureModel->item(row, 3)->text() : "0.000";
+        const QString depthAllowance = mFeatureModel->item(row, 4) ? mFeatureModel->item(row, 4)->text() : "0.000";
+        const QString sideAllowance = mFeatureModel->item(row, 5) ? mFeatureModel->item(row, 5)->text() : "0.000";
+        const bool isHole = feature.value("type").toString() == "圆孔";
+
+        QList<QStandardItem *> rowItems;
+        rowItems << makeCheckableIndexCell(sequenceIndex + 1, featureIndex)
+                 << makeEditableCell(process)
+                 << makeEditableCell(defaultToolNameForFeature(feature))
+                 << makeEditableCell(isHole ? "T01" : "T02")
+                 << makeEditableCell(isHole ? "12000" : "10000")
+                 << makeEditableCell(isHole ? "500" : "1200")
+                 << makeEditableCell(isHole ? "0.000" : "2.000")
+                 << makeEditableCell(depth)
+                 << makeEditableCell(isHole ? "1.000" : "0.500")
+                 << makeEditableCell("0.000")
+                 << makeEditableCell(sideAllowance)
+                 << makeEditableCell(depthAllowance)
+                 << makeEditableCell(QString("%1 %2").arg(feature.value("id").toString(), feature.value("notes").toString()).trimmed());
+        mSequenceModel->appendRow(rowItems);
+    }
+
+    mSequenceSelectAllChecked = false;
+    ui->table_CNC_Sequence->resizeColumnsToContents();
+    ui->table_CNC_Sequence->resizeRowsToContents();
+    switchCncPanelPage(1);
+    ui->textBrowser_Log->append(QString("已生成 %1 条工序。").arg(mSequenceModel->rowCount()));
+}
+
+void MainWindow::deleteSelectedSequenceRows()
+{
+    QList<int> rows = checkedRows(mSequenceModel);
+    if (rows.isEmpty()) {
+        const QModelIndexList selected = ui->table_CNC_Sequence->selectionModel()->selectedRows();
+        for (const QModelIndex &index : selected) {
+            rows.append(index.row());
+        }
+    }
+
+    if (rows.isEmpty()) {
+        ui->textBrowser_Log->append("<font color='#FFB74D'>请先勾选或选中要删除的工序。</font>");
+        return;
+    }
+
+    std::sort(rows.begin(), rows.end());
+    rows.erase(std::unique(rows.begin(), rows.end()), rows.end());
+
+    for (int i = rows.size() - 1; i >= 0; --i) {
+        mSequenceModel->removeRow(rows.at(i));
+    }
+
+    for (int row = 0; row < mSequenceModel->rowCount(); ++row) {
+        if (auto *item = mSequenceModel->item(row, 0)) {
+            item->setText(QString::number(row + 1));
+        }
+    }
+
+    mSequenceSelectAllChecked = true;
+    ui->textBrowser_Log->append("已删除选中的工序。");
 }
 
 void MainWindow::appendRecognitionLog(const QJsonObject &result)
@@ -450,6 +601,55 @@ void MainWindow::appendRecognitionLog(const QJsonObject &result)
     for (const QJsonValue &warning : warnings) {
         ui->textBrowser_Log->append(QString("<font color='#FFB74D'>警告: %1</font>").arg(warning.toString()));
     }
+}
+
+QList<int> MainWindow::checkedRows(const QStandardItemModel *model) const
+{
+    QList<int> rows;
+    if (!model) {
+        return rows;
+    }
+
+    for (int row = 0; row < model->rowCount(); ++row) {
+        const QStandardItem *item = model->item(row, 0);
+        if (item && item->isCheckable() && item->checkState() == Qt::Checked) {
+            rows.append(row);
+        }
+    }
+    return rows;
+}
+
+QString MainWindow::defaultProcessForFeature(const QJsonObject &feature) const
+{
+    const QString type = feature.value("type").toString();
+    if (type == "圆孔") {
+        return "钻孔";
+    }
+    if (type == "开放轮廓") {
+        return "开放轮廓铣";
+    }
+    if (type == "外轮廓" || type == "内轮廓" || type == "岛") {
+        return "轮廓铣";
+    }
+    return "通用加工";
+}
+
+QString MainWindow::defaultToolNameForFeature(const QJsonObject &feature) const
+{
+    const QString type = feature.value("type").toString();
+    if (type == "圆孔") {
+        const double diameter = feature.value("diameter").toDouble();
+        if (diameter > 0.0) {
+            return QString("钻刀 Φ%1").arg(diameter, 0, 'f', 3);
+        }
+        return "钻刀";
+    }
+
+    const double diameter = feature.value("diameter").toDouble();
+    if (diameter > 0.0) {
+        return QString("立铣刀 Φ%1").arg(diameter, 0, 'f', 3);
+    }
+    return "立铣刀 Φ6.000";
 }
 
 QString MainWindow::formatPointText(const QJsonObject &point) const
