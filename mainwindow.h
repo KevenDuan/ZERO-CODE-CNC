@@ -33,10 +33,13 @@ private:
     QString resolvePythonScriptPath() const;
     void switchMainPage(int index);
     void switchCncPanelPage(int index);
+    void setupProcessPage();
     void setupCadView();
     void setupTables();
     void setupConnections();
     void updateFeatureTableColumnWidths();
+    void importNCFile();
+    void toggleProcessRunState();
     void importDXF();
     void startDXFImport(const QString &dxfPath);
     void setImportUiBusy(bool busy);
@@ -70,8 +73,10 @@ private:
     QString mPendingDxfPath;
     QString mPendingSvgPath;
     QString mPendingJsonPath;
+    QString mCurrentNcPath;
     bool mFeatureSelectAllChecked;
     bool mSequenceSelectAllChecked;
+    bool mProcessRunning;
 };
 
 #endif // MAINWINDOW_H

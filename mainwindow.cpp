@@ -23,6 +23,7 @@
 #include <QPainterPath>
 #include <QPen>
 #include <QMessageBox>
+#include <QPlainTextEdit>
 #include <QProcess>
 #include <QPushButton>
 #include <QStandardItemModel>
@@ -177,18 +178,35 @@ MainWindow::MainWindow(QWidget *parent)
     , mHighlightItem(nullptr)
     , mSvgItem(nullptr)
     , mImportProcess(new QProcess(this))
+    , mCurrentNcPath()
     , mFeatureSelectAllChecked(true)
     , mSequenceSelectAllChecked(true)
+    , mProcessRunning(false)
 {
     ui->setupUi(this);
+    setupProcessPage();
     setupCadView();
     setupTables();
     setupConnections();
+    switchMainPage(0);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::setupProcessPage()
+{
+    ui->horizontalLayout_processCoords->setStretch(0, 1);
+    ui->horizontalLayout_processCoords->setStretch(1, 1);
+    ui->horizontalLayout_processMachineRemain->setStretch(0, 1);
+    ui->horizontalLayout_processMachineRemain->setStretch(1, 1);
+    ui->horizontalLayout_processBottom->setStretch(0, 1);
+    ui->horizontalLayout_processBottom->setStretch(1, 1);
+
+    ui->plainTextEdit_ProcessGCode->setLineWrapMode(QPlainTextEdit::NoWrap);
+    ui->plainTextEdit_ProcessGCode->setPlaceholderText("未导入 G 代码文件。");
 }
 
 void MainWindow::setupCadView()
@@ -276,6 +294,8 @@ void MainWindow::setupConnections()
 {
     connect(ui->btn_Big_Import, &QPushButton::clicked, this, &MainWindow::importDXF);
     connect(ui->btn_Small_Import, &QPushButton::clicked, this, &MainWindow::importDXF);
+    connect(ui->btn_ProcessImportNc, &QPushButton::clicked, this, &MainWindow::importNCFile);
+    connect(ui->btn_ProcessStartStop, &QPushButton::clicked, this, &MainWindow::toggleProcessRunState);
 
     connect(ui->btn_Nav_Process, &QPushButton::clicked, this, [this]() { switchMainPage(0); });
     connect(ui->btn_Nav_UserParam, &QPushButton::clicked, this, [this]() { switchMainPage(1); });
@@ -332,6 +352,56 @@ void MainWindow::setupConnections()
 
     connect(mImportProcess, &QProcess::finished, this, &MainWindow::handleImportProcessFinished);
     connect(mImportProcess, &QProcess::errorOccurred, this, &MainWindow::handleImportProcessErrorOccurred);
+}
+
+void MainWindow::importNCFile()
+{
+    const QString ncPath = QFileDialog::getOpenFileName(
+        this, "导入 G 代码", "", "NC/G代码 (*.nc *.tap *.txt *.gcode *.ngc);;所有文件 (*.*)"
+    );
+
+    if (ncPath.isEmpty()) {
+        return;
+    }
+
+    QFile file(ncPath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "导入失败", "无法打开选中的 NC 文件。");
+        return;
+    }
+
+    const QString codeText = QString::fromUtf8(file.readAll());
+    mCurrentNcPath = ncPath;
+    ui->label_ProcessNcFileName->setText(QFileInfo(ncPath).fileName());
+    ui->plainTextEdit_ProcessGCode->setPlainText(codeText);
+
+    int effectiveLineCount = 0;
+    const QStringList lines = codeText.split('\n');
+    for (const QString &line : lines) {
+        if (!line.trimmed().isEmpty()) {
+            ++effectiveLineCount;
+        }
+    }
+    ui->label_ProcessPartCount->setText(QString("加工代码行数: %1").arg(effectiveLineCount));
+}
+
+void MainWindow::toggleProcessRunState()
+{
+    mProcessRunning = !mProcessRunning;
+    if (mProcessRunning) {
+        ui->btn_ProcessStartStop->setText("停止");
+        ui->btn_ProcessStartStop->setStyleSheet(
+            "background-color: #C62828; color: white; font-size: 24px; font-weight: bold; border-radius: 10px;"
+        );
+        ui->label_ProcessRunTime->setText("运行时间: 运行中");
+        return;
+    }
+
+    ui->btn_ProcessStartStop->setText("启动");
+    ui->btn_ProcessStartStop->setStyleSheet(
+        "background-color: #2E7D32; color: white; font-size: 24px; font-weight: bold; border-radius: 10px;"
+    );
+    ui->label_ProcessRunTime->setText("运行时间: 00:00:00");
 }
 
 void MainWindow::importDXF()
