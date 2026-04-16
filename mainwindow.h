@@ -6,6 +6,8 @@
 #include <QJsonObject>
 #include <QList>
 #include <QProcess>
+#include <QStringList>
+#include <QVector3D>
 
 // 提前声明 UI 命名空间，这是 Qt 的标准做法
 QT_BEGIN_NAMESPACE
@@ -40,6 +42,12 @@ private:
     void updateFeatureTableColumnWidths();
     void importNCFile();
     void toggleProcessRunState();
+    void advanceProcessSimulation();
+    void renderProcessCodeView(int highlightLine);
+    void stopProcessSimulation(bool resetHighlight);
+    QString formatProcessTime(int totalSeconds) const;
+    void resetProcessCoordinateDemo();
+    void updateProcessCoordinateDemo(const QVector3D &programPosition);
     void importDXF();
     void startDXFImport(const QString &dxfPath);
     void setImportUiBusy(bool busy);
@@ -74,6 +82,12 @@ private:
     QString mPendingSvgPath;
     QString mPendingJsonPath;
     QString mCurrentNcPath;
+    QStringList mCurrentNcLines;
+    QList<QVector3D> mNcLinePositions;
+    QVector3D mNcFinalPosition;
+    QTimer *mProcessSimulationTimer;
+    int mCurrentNcLineIndex;
+    int mProcessElapsedSeconds;
     bool mFeatureSelectAllChecked;
     bool mSequenceSelectAllChecked;
     bool mProcessRunning;

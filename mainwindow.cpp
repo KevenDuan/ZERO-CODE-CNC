@@ -20,14 +20,18 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonParseError>
+#include <QLabel>
 #include <QPainterPath>
 #include <QPen>
 #include <QMessageBox>
-#include <QPlainTextEdit>
 #include <QProcess>
 #include <QPushButton>
+#include <QRegularExpression>
+#include <QScrollBar>
 #include <QStandardItemModel>
 #include <QTimer>
+#include <QTextBlock>
+#include <QTextEdit>
 #include <QMouseEvent>
 #include <QWheelEvent>
 
@@ -53,6 +57,27 @@ protected:
 private:
     QGraphicsView *mView;
 };
+
+static bool extractNcAxisValue(const QString &line, QChar axis, double &value)
+{
+    const QRegularExpression regex(
+        QString(R"((?:^|[^A-Z0-9_])%1\s*([-+]?(?:\d+(?:\.\d*)?|\.\d+)))").arg(axis),
+        QRegularExpression::CaseInsensitiveOption
+    );
+    const QRegularExpressionMatch match = regex.match(line);
+    if (!match.hasMatch()) {
+        return false;
+    }
+
+    bool ok = false;
+    const double parsedValue = match.captured(1).toDouble(&ok);
+    if (!ok) {
+        return false;
+    }
+
+    value = parsedValue;
+    return true;
+}
 
 namespace {
 QString confidenceLabelColor(const QString &type)
@@ -179,6 +204,12 @@ MainWindow::MainWindow(QWidget *parent)
     , mSvgItem(nullptr)
     , mImportProcess(new QProcess(this))
     , mCurrentNcPath()
+    , mCurrentNcLines()
+    , mNcLinePositions()
+    , mNcFinalPosition()
+    , mProcessSimulationTimer(new QTimer(this))
+    , mCurrentNcLineIndex(-1)
+    , mProcessElapsedSeconds(0)
     , mFeatureSelectAllChecked(true)
     , mSequenceSelectAllChecked(true)
     , mProcessRunning(false)
@@ -198,15 +229,183 @@ MainWindow::~MainWindow()
 
 void MainWindow::setupProcessPage()
 {
+    ui->widget_ProcessHeader->hide();
+    ui->verticalLayout_processPage->setContentsMargins(10, 10, 10, 10);
+    ui->verticalLayout_processPage->setSpacing(10);
+    ui->verticalLayout_processPage->setStretch(0, 0);
+    ui->verticalLayout_processPage->setStretch(1, 11);
+    ui->verticalLayout_processPage->setStretch(2, 10);
     ui->horizontalLayout_processCoords->setStretch(0, 1);
     ui->horizontalLayout_processCoords->setStretch(1, 1);
     ui->horizontalLayout_processMachineRemain->setStretch(0, 1);
     ui->horizontalLayout_processMachineRemain->setStretch(1, 1);
     ui->horizontalLayout_processBottom->setStretch(0, 1);
     ui->horizontalLayout_processBottom->setStretch(1, 1);
+    ui->gridLayout_processRelative->setColumnStretch(0, 1);
+    ui->gridLayout_processRelative->setColumnStretch(1, 3);
+    ui->gridLayout_processMachine->setColumnStretch(0, 1);
+    ui->gridLayout_processMachine->setColumnStretch(1, 3);
+    ui->gridLayout_processRemain->setColumnStretch(0, 1);
+    ui->gridLayout_processRemain->setColumnStretch(1, 3);
+    ui->gridLayout_processRelative->setRowStretch(0, 1);
+    ui->gridLayout_processRelative->setRowStretch(1, 1);
+    ui->gridLayout_processRelative->setRowStretch(2, 1);
+    ui->gridLayout_processMachine->setRowStretch(0, 1);
+    ui->gridLayout_processMachine->setRowStretch(1, 1);
+    ui->gridLayout_processMachine->setRowStretch(2, 1);
+    ui->gridLayout_processRemain->setRowStretch(0, 1);
+    ui->gridLayout_processRemain->setRowStretch(1, 1);
+    ui->gridLayout_processRemain->setRowStretch(2, 1);
+    ui->horizontalLayout_processHeader->setSpacing(10);
+    ui->horizontalSpacer_processHeader->changeSize(8, 20, QSizePolicy::Fixed, QSizePolicy::Minimum);
 
-    ui->plainTextEdit_ProcessGCode->setLineWrapMode(QPlainTextEdit::NoWrap);
+    const QString axisTitleStyle =
+        "background-color: #34373C;"
+        "border: none;"
+        "border-radius: 10px;"
+        "padding: 8px 10px;"
+        "font-size: 28px;"
+        "font-weight: bold;"
+        "color: #C3CDD7;"
+        "min-height: 54px;";
+    const QString coordValueStyle =
+        "background-color: #18211D;"
+        "border: 1px solid #2E5640;"
+        "border-radius: 12px;"
+        "padding: 8px 12px;"
+        "font-family: 'Consolas', 'Microsoft YaHei';"
+        "font-size: 30px;"
+        "font-weight: bold;"
+        "color: #63E88A;"
+        "min-height: 56px;";
+    const QString infoPrimaryStyle =
+        "background-color: #20262D;"
+        "border: 1px solid #34404C;"
+        "border-left: 4px solid #5FB0FF;"
+        "border-radius: 10px;"
+        "padding: 12px 14px;"
+        "font-size: 24px;"
+        "font-weight: 700;"
+        "color: #E6EEF7;"
+        "min-height: 60px;";
+    const QString infoSecondaryStyle =
+        "background-color: #20262D;"
+        "border: 1px solid #34404C;"
+        "border-left: 4px solid #58E57A;"
+        "border-radius: 10px;"
+        "padding: 12px 14px;"
+        "font-size: 24px;"
+        "font-weight: 700;"
+        "color: #E6EEF7;"
+        "min-height: 60px;";
+    const QString ncFileStyle =
+        "background-color: #262C33;"
+        "border: none;"
+        "border-radius: 10px;"
+        "padding: 8px 10px;"
+        "font-size: 15px;"
+        "font-weight: 700;"
+        "color: #B9D9F5;"
+        "min-height: 34px;";
+
+    ui->label_ProcessActualTitle->hide();
+    ui->label_ProcessParamTitle->hide();
+    ui->label_ProcessParamValue->hide();
+    ui->label_ProcessLineValue->hide();
+
+    const QList<QLabel *> axisTitleLabels = {
+        ui->label_ProcessRelativeXTitle,
+        ui->label_ProcessRelativeYTitle,
+        ui->label_ProcessRelativeZTitle,
+        ui->label_ProcessMachineXTitle,
+        ui->label_ProcessMachineYTitle,
+        ui->label_ProcessMachineZTitle,
+        ui->label_ProcessRemainXTitle,
+        ui->label_ProcessRemainYTitle,
+        ui->label_ProcessRemainZTitle
+    };
+    for (QLabel *label : axisTitleLabels) {
+        label->setAlignment(Qt::AlignCenter);
+        label->setStyleSheet(axisTitleStyle);
+    }
+
+    const QList<QLabel *> coordValueLabels = {
+        ui->label_ProcessRelativeXValue,
+        ui->label_ProcessRelativeYValue,
+        ui->label_ProcessRelativeZValue,
+        ui->label_ProcessMachineXValue,
+        ui->label_ProcessMachineYValue,
+        ui->label_ProcessMachineZValue,
+        ui->label_ProcessRemainXValue,
+        ui->label_ProcessRemainYValue,
+        ui->label_ProcessRemainZValue
+    };
+    for (QLabel *label : coordValueLabels) {
+        label->setAlignment(Qt::AlignCenter);
+        label->setStyleSheet(coordValueStyle);
+    }
+
+    ui->label_ProcessNcFileName->setAlignment(Qt::AlignCenter);
+    ui->label_ProcessNcFileName->setStyleSheet(ncFileStyle);
+    ui->groupBox_ProcessRunInfo->setStyleSheet(
+        "QGroupBox#groupBox_ProcessRunInfo {"
+        " background-color: #1C2026;"
+        " border: 1px solid #313842;"
+        " border-radius: 12px;"
+        " margin-top: 16px;"
+        "}"
+        "QGroupBox#groupBox_ProcessRunInfo::title {"
+        " subcontrol-origin: margin;"
+        " subcontrol-position: top left;"
+        " left: 12px;"
+        " padding: 0 6px;"
+        " color: #9EABB8;"
+        " font-size: 14px;"
+        " font-weight: 700;"
+        "}"
+    );
+    ui->verticalLayout_processRunInfo->setSpacing(14);
+    ui->label_ProcessPartCount->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+    ui->label_ProcessPartCount->setStyleSheet(infoPrimaryStyle);
+    ui->label_ProcessRunTime->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+    ui->label_ProcessRunTime->setStyleSheet(infoSecondaryStyle);
+    ui->label_ProcessCycleTime->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+    ui->label_ProcessCycleTime->setStyleSheet(infoSecondaryStyle);
+    ui->btn_ProcessStartStop->setMinimumHeight(76);
+    ui->btn_ProcessStartStop->setStyleSheet(
+        "background-color: #238636;"
+        "border: 1px solid #34A853;"
+        "border-radius: 12px;"
+        "color: #F6FFF8;"
+        "font-size: 26px;"
+        "font-weight: 800;"
+    );
+
+    ui->btn_ProcessImportNc->setStyleSheet(
+        "background-color: #434B55;"
+        "border: 1px solid #58626E;"
+        "border-radius: 17px;"
+        "color: #E8EEF5;"
+        "font-size: 20px;"
+        "font-weight: bold;"
+    );
+    ui->plainTextEdit_ProcessGCode->setStyleSheet(
+        "background-color: #1D2127;"
+        "border: 1px solid #343A42;"
+        "border-radius: 10px;"
+        "color: #D7DEE6;"
+        "font-family: 'Consolas', 'Microsoft YaHei';"
+        "font-size: 22px;"
+        "padding: 10px;"
+    );
+
+    mProcessSimulationTimer->setInterval(500);
+    connect(mProcessSimulationTimer, &QTimer::timeout, this, &MainWindow::advanceProcessSimulation);
+
+    ui->plainTextEdit_ProcessGCode->setLineWrapMode(QTextEdit::NoWrap);
     ui->plainTextEdit_ProcessGCode->setPlaceholderText("未导入 G 代码文件。");
+    renderProcessCodeView(-1);
+    resetProcessCoordinateDemo();
 }
 
 void MainWindow::setupCadView()
@@ -354,6 +553,146 @@ void MainWindow::setupConnections()
     connect(mImportProcess, &QProcess::errorOccurred, this, &MainWindow::handleImportProcessErrorOccurred);
 }
 
+QString MainWindow::formatProcessTime(int totalSeconds) const
+{
+    const int hours = totalSeconds / 3600;
+    const int minutes = (totalSeconds % 3600) / 60;
+    const int seconds = totalSeconds % 60;
+    return QString("%1:%2:%3")
+        .arg(hours, 2, 10, QLatin1Char('0'))
+        .arg(minutes, 2, 10, QLatin1Char('0'))
+        .arg(seconds, 2, 10, QLatin1Char('0'));
+}
+
+void MainWindow::resetProcessCoordinateDemo()
+{
+    updateProcessCoordinateDemo(QVector3D(0.0f, 0.0f, 0.0f));
+}
+
+void MainWindow::updateProcessCoordinateDemo(const QVector3D &programPosition)
+{
+    const QVector3D machineOffset(320.0f, 180.0f, 80.0f);
+    const QVector3D machinePosition = machineOffset + programPosition;
+    const QVector3D remainPosition = mNcFinalPosition - programPosition;
+
+    auto formatAxis = [](float value) {
+        return QString::number(static_cast<double>(value), 'f', 3);
+    };
+
+    ui->label_ProcessRelativeXValue->setText(formatAxis(programPosition.x()));
+    ui->label_ProcessRelativeYValue->setText(formatAxis(programPosition.y()));
+    ui->label_ProcessRelativeZValue->setText(formatAxis(programPosition.z()));
+
+    ui->label_ProcessMachineXValue->setText(formatAxis(machinePosition.x()));
+    ui->label_ProcessMachineYValue->setText(formatAxis(machinePosition.y()));
+    ui->label_ProcessMachineZValue->setText(formatAxis(machinePosition.z()));
+
+    ui->label_ProcessRemainXValue->setText(formatAxis(remainPosition.x()));
+    ui->label_ProcessRemainYValue->setText(formatAxis(remainPosition.y()));
+    ui->label_ProcessRemainZValue->setText(formatAxis(remainPosition.z()));
+}
+
+void MainWindow::renderProcessCodeView(int highlightLine)
+{
+    if (mCurrentNcLines.isEmpty()) {
+        ui->plainTextEdit_ProcessGCode->setHtml(
+            "<div style='font-family:Consolas,\"Microsoft YaHei\";font-size:20px;color:#D7DEE6;'>未导入 G 代码文件。</div>"
+        );
+        return;
+    }
+
+    QStringList htmlLines;
+    htmlLines.reserve(mCurrentNcLines.size());
+    for (int index = 0; index < mCurrentNcLines.size(); ++index) {
+        QString escapedLine = mCurrentNcLines.at(index).toHtmlEscaped();
+        escapedLine.replace(" ", "&nbsp;");
+        if (escapedLine.isEmpty()) {
+            escapedLine = "&nbsp;";
+        }
+
+        if (index == highlightLine) {
+            htmlLines.append(
+                "<div style='background-color:#214331;border:1px solid #4A8E67;border-radius:8px;"
+                "padding:8px 12px;color:#98FFB8;font-size:50px;font-weight:900;'>" + escapedLine + "</div>"
+            );
+        } else {
+            htmlLines.append(
+                "<div style='padding:5px 8px;color:#D7DEE6;font-size:24px;'>" + escapedLine + "</div>"
+            );
+        }
+    }
+
+    ui->plainTextEdit_ProcessGCode->setHtml(
+        "<div style='font-family:Consolas,\"Microsoft YaHei\";background:#1F2329;'>" + htmlLines.join("") + "</div>"
+    );
+
+    if (highlightLine >= 0) {
+        QTextCursor cursor(ui->plainTextEdit_ProcessGCode->document()->findBlockByLineNumber(highlightLine));
+        if (!cursor.isNull()) {
+            ui->plainTextEdit_ProcessGCode->setTextCursor(cursor);
+            const QRect cursorRect = ui->plainTextEdit_ProcessGCode->cursorRect(cursor);
+            QScrollBar *scrollBar = ui->plainTextEdit_ProcessGCode->verticalScrollBar();
+            const int targetValue = std::clamp(
+                scrollBar->value() + cursorRect.center().y()
+                    - ui->plainTextEdit_ProcessGCode->viewport()->height() / 2,
+                scrollBar->minimum(),
+                scrollBar->maximum()
+            );
+            scrollBar->setValue(targetValue);
+        }
+    } else {
+        ui->plainTextEdit_ProcessGCode->moveCursor(QTextCursor::Start);
+    }
+}
+
+void MainWindow::stopProcessSimulation(bool resetHighlight)
+{
+    mProcessSimulationTimer->stop();
+    mProcessRunning = false;
+    ui->btn_ProcessStartStop->setText("启动");
+    ui->btn_ProcessStartStop->setStyleSheet(
+        "background-color: #238636;"
+        "border: 1px solid #34A853;"
+        "border-radius: 12px;"
+        "color: #F6FFF8;"
+        "font-size: 26px;"
+        "font-weight: 800;"
+    );
+    ui->label_ProcessRunTime->setText(QString("运行时间: %1").arg(formatProcessTime(mProcessElapsedSeconds)));
+    ui->label_ProcessCycleTime->setText(QString("循环时间: %1").arg(formatProcessTime(mProcessElapsedSeconds)));
+    if (resetHighlight) {
+        mCurrentNcLineIndex = -1;
+        renderProcessCodeView(-1);
+        resetProcessCoordinateDemo();
+    } else if (mCurrentNcLineIndex >= 0 && mCurrentNcLineIndex < mNcLinePositions.size()) {
+        updateProcessCoordinateDemo(mNcLinePositions.at(mCurrentNcLineIndex));
+    }
+}
+
+void MainWindow::advanceProcessSimulation()
+{
+    if (mCurrentNcLines.isEmpty()) {
+        stopProcessSimulation(true);
+        return;
+    }
+
+    ++mCurrentNcLineIndex;
+    if (mCurrentNcLineIndex >= mCurrentNcLines.size()) {
+        mCurrentNcLineIndex = mCurrentNcLines.size() - 1;
+        renderProcessCodeView(mCurrentNcLineIndex);
+        stopProcessSimulation(false);
+        return;
+    }
+
+    ++mProcessElapsedSeconds;
+    renderProcessCodeView(mCurrentNcLineIndex);
+    if (mCurrentNcLineIndex >= 0 && mCurrentNcLineIndex < mNcLinePositions.size()) {
+        updateProcessCoordinateDemo(mNcLinePositions.at(mCurrentNcLineIndex));
+    }
+    ui->label_ProcessRunTime->setText(QString("运行时间: %1").arg(formatProcessTime(mProcessElapsedSeconds)));
+    ui->label_ProcessCycleTime->setText(QString("循环时间: %1").arg(formatProcessTime(mProcessElapsedSeconds)));
+}
+
 void MainWindow::importNCFile()
 {
     const QString ncPath = QFileDialog::getOpenFileName(
@@ -371,37 +710,71 @@ void MainWindow::importNCFile()
     }
 
     const QString codeText = QString::fromUtf8(file.readAll());
+    stopProcessSimulation(true);
     mCurrentNcPath = ncPath;
+    mCurrentNcLines = codeText.split('\n', Qt::KeepEmptyParts);
+    mNcLinePositions.clear();
+    QVector3D currentPosition(0.0f, 0.0f, 0.0f);
+    for (const QString &line : mCurrentNcLines) {
+        double axisValue = 0.0;
+        if (extractNcAxisValue(line, 'X', axisValue)) {
+            currentPosition.setX(static_cast<float>(axisValue));
+        }
+        if (extractNcAxisValue(line, 'Y', axisValue)) {
+            currentPosition.setY(static_cast<float>(axisValue));
+        }
+        if (extractNcAxisValue(line, 'Z', axisValue)) {
+            currentPosition.setZ(static_cast<float>(axisValue));
+        }
+        mNcLinePositions.append(currentPosition);
+    }
+    mNcFinalPosition = mNcLinePositions.isEmpty() ? QVector3D(0.0f, 0.0f, 0.0f) : mNcLinePositions.constLast();
+    mProcessElapsedSeconds = 0;
     ui->label_ProcessNcFileName->setText(QFileInfo(ncPath).fileName());
-    ui->plainTextEdit_ProcessGCode->setPlainText(codeText);
+    renderProcessCodeView(-1);
+    resetProcessCoordinateDemo();
 
     int effectiveLineCount = 0;
-    const QStringList lines = codeText.split('\n');
-    for (const QString &line : lines) {
+    for (const QString &line : mCurrentNcLines) {
         if (!line.trimmed().isEmpty()) {
             ++effectiveLineCount;
         }
     }
     ui->label_ProcessPartCount->setText(QString("加工代码行数: %1").arg(effectiveLineCount));
+    ui->label_ProcessRunTime->setText("运行时间: 00:00:00");
+    ui->label_ProcessCycleTime->setText("循环时间: 00:00:00");
 }
 
 void MainWindow::toggleProcessRunState()
 {
-    mProcessRunning = !mProcessRunning;
-    if (mProcessRunning) {
-        ui->btn_ProcessStartStop->setText("停止");
-        ui->btn_ProcessStartStop->setStyleSheet(
-            "background-color: #C62828; color: white; font-size: 24px; font-weight: bold; border-radius: 10px;"
-        );
-        ui->label_ProcessRunTime->setText("运行时间: 运行中");
+    if (mCurrentNcLines.isEmpty()) {
+        QMessageBox::information(this, "提示", "请先导入 NC 文件。");
         return;
     }
 
-    ui->btn_ProcessStartStop->setText("启动");
+    if (mProcessRunning) {
+        stopProcessSimulation(false);
+        return;
+    }
+
+    mProcessRunning = true;
+    mCurrentNcLineIndex = -1;
+    mProcessElapsedSeconds = 0;
+    ui->btn_ProcessStartStop->setText("停止");
     ui->btn_ProcessStartStop->setStyleSheet(
-        "background-color: #2E7D32; color: white; font-size: 24px; font-weight: bold; border-radius: 10px;"
+        "background-color: #AA2E25;"
+        "border: 1px solid #D34E45;"
+        "border-radius: 12px;"
+        "color: #FFF4F2;"
+        "font-size: 26px;"
+        "font-weight: 800;"
     );
     ui->label_ProcessRunTime->setText("运行时间: 00:00:00");
+    ui->label_ProcessCycleTime->setText("循环时间: 00:00:00");
+    renderProcessCodeView(-1);
+    resetProcessCoordinateDemo();
+    advanceProcessSimulation();
+    mProcessSimulationTimer->start();
 }
 
 void MainWindow::importDXF()
